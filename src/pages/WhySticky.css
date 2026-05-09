@@ -1,0 +1,332 @@
+/* ══════════════════════════════════════════════════════════
+   STICKY WHY US — Light Theme Assembly Line
+   ══════════════════════════════════════════════════════════ */
+
+.why-sticky-section {
+  position: relative;
+  background: #F8F9FA;
+  /* NO overflow hidden — breaks sticky */
+}
+
+/* Subtle grid texture */
+.why-sticky-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+}
+
+/* Top/bottom separator lines */
+.why-sticky-line {
+  position: absolute;
+  left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(247,188,33,0.2) 30%, rgba(247,188,33,0.2) 70%, transparent);
+  z-index: 2;
+}
+.why-sticky-line.top { top: 0; }
+.why-sticky-line.bottom { bottom: 0; }
+
+/* ── Layout — NO container wrapper, raw grid ── */
+.why-sticky-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  max-width: var(--max-w);
+  margin: 0 auto;
+}
+
+@media (max-width: 900px) {
+  .why-sticky-inner {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Left Panel (Sticky) ── */
+.why-sticky-left {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 4rem clamp(2rem, 5vw, 5rem);
+  z-index: 2;
+}
+
+@media (max-width: 900px) {
+  .why-sticky-left {
+    position: relative;
+    height: auto;
+    padding: 4rem 1.5rem 2rem;
+  }
+}
+
+/* Light theme overrides */
+.why-sticky-label {
+  font-family: 'Courier New', monospace;
+  font-size: 0.65rem;
+  color: var(--clr-orange);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.why-sticky-label::before {
+  content: '';
+  width: 20px;
+  height: 1px;
+  background: var(--clr-orange);
+}
+
+.why-sticky-heading {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  line-height: 1.05;
+  color: #111;
+  text-transform: uppercase;
+  margin-bottom: 1.5rem;
+}
+.why-sticky-heading .accent {
+  color: var(--clr-orange);
+}
+
+.why-sticky-desc {
+  font-size: 1rem;
+  line-height: 1.8;
+  color: #555;
+  max-width: 420px;
+  margin-bottom: 2rem;
+}
+
+/* CTA buttons — light theme */
+.why-sticky-ctas {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.why-cta-dark {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.8rem 1.5rem;
+  background: #111;
+  color: white;
+  font-weight: 600;
+  font-size: 0.85rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s var(--ease-out);
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+}
+.why-cta-dark:hover {
+  background: var(--clr-orange);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(247,188,33,0.25);
+}
+
+.why-cta-light {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.8rem 1.5rem;
+  background: transparent;
+  color: #333;
+  font-weight: 600;
+  font-size: 0.85rem;
+  border: 1px solid #ddd;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.why-cta-light:hover {
+  border-color: var(--clr-orange);
+  color: var(--clr-orange);
+}
+
+/* Progress indicator */
+.why-progress {
+  margin-top: 3rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.why-progress-bar {
+  width: 120px;
+  height: 2px;
+  background: #e0e0e0;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.why-progress-fill {
+  height: 100%;
+  background: var(--clr-orange);
+  border-radius: 2px;
+  transition: width 0.5s var(--ease-out);
+}
+.why-progress-text {
+  font-family: 'Courier New', monospace;
+  font-size: 0.65rem;
+  color: #999;
+  letter-spacing: 0.1em;
+}
+
+/* ── Right Panel (Scrolling Items) ── */
+.why-sticky-right {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 0 clamp(1rem, 3vw, 3rem);
+  padding-bottom: 30vh; /* extra space so last item can scroll into center */
+}
+
+/* Continuous connecting line — full height of right panel */
+.why-sticky-right::before {
+  content: '';
+  position: absolute;
+  left: calc(clamp(1rem, 3vw, 3rem) + 23px);
+  top: 35vh;
+  bottom: calc(30vh + 35vh);
+  width: 1px;
+  background: #e0e0e0;
+  z-index: 0;
+}
+
+@media (max-width: 900px) {
+  .why-sticky-right {
+    padding: 2rem 1.5rem 4rem;
+  }
+}
+
+/* ── Individual Reason Card ── */
+.why-reason {
+  position: relative;
+  /* Each reason takes most of viewport height so sticky works */
+  min-height: 70vh;
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  padding: 2rem 0;
+  transition: opacity 0.5s ease;
+  opacity: 0.25;
+}
+.why-reason.active {
+  opacity: 1;
+}
+
+/* Active connecting line highlight */
+.why-reason.active::after {
+  content: '';
+  position: absolute;
+  left: 24px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--clr-orange);
+  animation: lineReveal 0.6s var(--ease-out) forwards;
+  transform-origin: top;
+}
+@keyframes lineReveal {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+
+/* Step number */
+.why-reason-num {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: #bbb;
+  border: 1px solid #e0e0e0;
+  background: white;
+  position: relative;
+  z-index: 2;
+  transition: all 0.5s var(--ease-out);
+  clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+}
+.why-reason.active .why-reason-num {
+  background: var(--clr-orange);
+  border-color: var(--clr-orange);
+  color: white;
+  box-shadow: 0 4px 16px rgba(247,188,33,0.3);
+}
+
+/* Icon inside number */
+.why-reason-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s;
+  color: white;
+}
+.why-reason.active .why-reason-icon {
+  transform: translate(-50%, -50%) scale(1);
+}
+.why-reason.active .why-reason-numtext {
+  display: none;
+}
+
+/* Content */
+.why-reason-content {
+  flex: 1;
+  max-width: 400px;
+}
+
+.why-reason-title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ccc;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.5rem;
+  transition: color 0.5s;
+}
+.why-reason.active .why-reason-title {
+  color: #111;
+}
+
+.why-reason-desc {
+  font-size: 0.95rem;
+  color: #ccc;
+  line-height: 1.7;
+  transition: color 0.5s;
+}
+.why-reason.active .why-reason-desc {
+  color: #555;
+}
+
+/* Orange detail line under active title */
+.why-reason-accent {
+  width: 0;
+  height: 2px;
+  background: var(--clr-orange);
+  margin-top: 1rem;
+  border-radius: 2px;
+  transition: width 0.6s var(--ease-out);
+}
+.why-reason.active .why-reason-accent {
+  width: 40px;
+  box-shadow: 0 0 6px rgba(247,188,33,0.3);
+}
+
+/* ── Mobile ── */
+@media (max-width: 900px) {
+  .why-reason {
+    min-height: auto;
+    padding: 3rem 0 3rem 3rem;
+  }
+  .why-sticky-right::before { left: calc(1.5rem + 19px); }
+  .why-reason.active::after { left: 0; }
+  .why-reason-num { width: 40px; height: 40px; font-size: 0.85rem; }
+  .why-progress { display: none; }
+}

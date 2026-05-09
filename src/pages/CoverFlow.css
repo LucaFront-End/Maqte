@@ -1,0 +1,399 @@
+/* ══════════════════════════════════════════════════════════
+   COVER FLOW CATEGORIES — Cinematic 3D Carousel
+   ══════════════════════════════════════════════════════════ */
+
+.coverflow-section {
+  position: relative;
+  padding: clamp(3rem, 6vw, 5rem) 0;
+  overflow: hidden;
+  background: var(--clr-bg);
+}
+
+/* ── Cinematic Background Image ── */
+.coverflow-bg-image {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  transition: background-image 0.8s ease;
+  z-index: 0;
+}
+.coverflow-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(10,10,12,0.92) 0%,
+    rgba(10,10,12,0.75) 40%,
+    rgba(10,10,12,0.85) 70%,
+    rgba(10,10,12,0.95) 100%
+  );
+  z-index: 1;
+}
+.coverflow-bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(252,180,5,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(252,180,5,0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Dynamic glow that changes with active category */
+.coverflow-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 900px;
+  height: 700px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  filter: blur(130px);
+  opacity: 0.1;
+  transition: background 0.8s ease, opacity 0.8s ease;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Decorative HUD lines */
+.coverflow-deco-line {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+}
+.coverflow-deco-line.top {
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(252,180,5,0.2) 30%, rgba(252,180,5,0.2) 70%, transparent);
+}
+.coverflow-deco-line.bottom {
+  bottom: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(252,180,5,0.15) 30%, rgba(252,180,5,0.15) 70%, transparent);
+}
+.coverflow-deco-line.left-vert {
+  left: 40px; top: 0; bottom: 0; width: 1px;
+  background: linear-gradient(180deg, transparent 10%, rgba(252,180,5,0.08) 30%, rgba(252,180,5,0.08) 70%, transparent 90%);
+}
+.coverflow-deco-line.right-vert {
+  right: 40px; top: 0; bottom: 0; width: 1px;
+  background: linear-gradient(180deg, transparent 10%, rgba(252,180,5,0.08) 30%, rgba(252,180,5,0.08) 70%, transparent 90%);
+}
+
+/* Active category label floating */
+.coverflow-active-label {
+  position: absolute;
+  top: 2rem;
+  right: 5rem;
+  font-family: 'Courier New', monospace;
+  font-size: 0.6rem;
+  color: rgba(252,180,5,0.3);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  z-index: 5;
+  pointer-events: none;
+  transition: color 0.5s;
+}
+
+/* Section Header */
+.coverflow-header {
+  position: relative;
+  z-index: 5;
+  text-align: center;
+  margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+/* ── Carousel Viewport ── */
+.coverflow-viewport {
+  position: relative;
+  z-index: 5;
+  width: 100%;
+  height: 400px;
+  perspective: 1200px;
+  perspective-origin: center center;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.coverflow-viewport:active { cursor: grabbing; }
+
+/* Track — holds all cards and is dragged */
+.coverflow-track {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  will-change: transform;
+}
+
+/* ── Individual Card ── */
+.coverflow-card {
+  position: absolute;
+  width: 340px;
+  height: 380px;
+  flex-shrink: 0;
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+              filter 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.coverflow-card-inner {
+  width: 100%;
+  height: 100%;
+  background: var(--clr-surface);
+  border: 1px solid var(--clr-border);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
+}
+
+/* Card glow overlay on active */
+.coverflow-card-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, var(--card-accent), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+.coverflow-card.active .coverflow-card-glow {
+  opacity: 0.12;
+}
+
+/* Active card border glow */
+.coverflow-card.active .coverflow-card-inner {
+  border-color: color-mix(in srgb, var(--card-accent) 40%, transparent);
+  box-shadow: 
+    0 0 40px color-mix(in srgb, var(--card-accent) 15%, transparent),
+    0 20px 60px rgba(0,0,0,0.5);
+}
+
+/* Top zone: Icon + Category Number */
+.cf-card-top {
+  position: relative;
+  z-index: 1;
+  padding: 1.5rem 1.5rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--clr-border);
+}
+
+.cf-card-icon-wrap {
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--card-accent) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--card-accent) 20%, transparent);
+  font-size: 2rem;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+}
+.coverflow-card.active .cf-card-icon-wrap {
+  transform: scale(1.1) rotate(-5deg);
+}
+
+.cf-card-number {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  color: rgba(255,255,255,0.04);
+  line-height: 1;
+  transition: color 0.4s ease;
+}
+.coverflow-card.active .cf-card-number {
+  color: color-mix(in srgb, var(--card-accent) 15%, transparent);
+}
+
+/* Middle zone: Title + Description */
+.cf-card-body {
+  position: relative;
+  z-index: 1;
+  padding: 1rem 1.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.cf-card-title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--clr-text);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+.cf-card-desc {
+  font-size: 0.85rem;
+  color: var(--clr-text-3);
+  line-height: 1.5;
+  transition: color 0.3s;
+}
+.coverflow-card.active .cf-card-desc {
+  color: var(--clr-text-2);
+}
+
+/* Subcategories — hidden on inactive, revealed on active */
+.cf-card-subs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: auto;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.5s var(--ease-out), opacity 0.4s var(--ease-out);
+}
+.coverflow-card.active .cf-card-subs {
+  max-height: 120px;
+  opacity: 1;
+}
+
+.cf-sub-chip {
+  font-family: 'Courier New', monospace;
+  font-size: 0.65rem;
+  padding: 0.2rem 0.5rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--clr-border);
+  color: var(--clr-text-3);
+  clip-path: polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px));
+}
+
+/* Bottom bar */
+.cf-card-footer {
+  position: relative;
+  z-index: 1;
+  padding: 0.75rem 1.5rem;
+  border-top: 1px solid var(--clr-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255,255,255,0.01);
+}
+
+.cf-card-count {
+  font-family: 'Courier New', monospace;
+  font-size: 0.65rem;
+  color: var(--clr-text-3);
+  letter-spacing: 0.1em;
+}
+
+.cf-card-explore {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--clr-text-3);
+  transition: color 0.3s, transform 0.3s;
+}
+.coverflow-card.active .cf-card-explore {
+  color: var(--card-accent);
+}
+.coverflow-card.active:hover .cf-card-explore {
+  transform: translateX(4px);
+}
+
+/* ── Navigation Controls ── */
+.coverflow-controls {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.cf-nav-btn {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--clr-border);
+  color: var(--clr-text-2);
+  cursor: pointer;
+  transition: all 0.25s var(--ease-out);
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+}
+.cf-nav-btn:hover {
+  border-color: var(--clr-orange);
+  color: var(--clr-orange);
+  background: var(--clr-orange-subtle);
+}
+
+.cf-dots {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.cf-dot {
+  width: 8px;
+  height: 8px;
+  background: rgba(255,255,255,0.08);
+  cursor: pointer;
+  transition: all 0.3s var(--ease-out);
+  clip-path: polygon(0 0, calc(100% - 2px) 0, 100% 2px, 100% 100%, 2px 100%, 0 calc(100% - 2px));
+}
+.cf-dot.active {
+  width: 32px;
+  background: var(--clr-orange);
+  box-shadow: 0 0 12px rgba(252,180,5,0.4);
+}
+.cf-dot:hover {
+  background: rgba(252,180,5,0.5);
+}
+
+/* Counter */
+.cf-counter {
+  font-family: 'Courier New', monospace;
+  font-size: 0.72rem;
+  color: var(--clr-text-3);
+  letter-spacing: 0.1em;
+}
+.cf-counter-active {
+  color: var(--clr-orange);
+  font-weight: 700;
+}
+
+/* ── Drag Instruction ── */
+.cf-drag-hint {
+  position: relative;
+  z-index: 5;
+  text-align: center;
+  margin-top: 0.75rem;
+  font-family: 'Courier New', monospace;
+  font-size: 0.6rem;
+  color: rgba(252,180,5,0.3);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+/* ── Mobile ── */
+@media (max-width: 900px) {
+  .coverflow-viewport { height: 360px; }
+  .coverflow-card { width: 280px; height: 340px; }
+  .cf-card-top { padding: 1.5rem 1.5rem 1rem; }
+  .cf-card-body { padding: 1rem 1.5rem; }
+  .cf-card-footer { padding: 0.75rem 1.5rem; }
+  .cf-card-title { font-size: 1.5rem; }
+  .cf-card-icon-wrap { width: 52px; height: 52px; font-size: 1.6rem; }
+}
+
+@media (max-width: 600px) {
+  .coverflow-card { width: 250px; height: 320px; }
+}

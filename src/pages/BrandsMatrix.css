@@ -1,0 +1,319 @@
+/* ══════════════════════════════════════════════════════════
+   BRANDS MATRIX — Institutional Plaques with Logos
+   ══════════════════════════════════════════════════════════ */
+
+.brands-matrix-section {
+  position: relative;
+  background: #F0F1F3;
+  padding: clamp(5rem, 10vw, 8rem) 0;
+  overflow: hidden;
+}
+
+/* Brushed metal panel texture */
+.brands-matrix-dots {
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.012) 2px,
+      rgba(0,0,0,0.012) 4px
+    );
+  pointer-events: none;
+}
+
+/* Panel mounting bolts */
+.brands-matrix-section::before,
+.brands-matrix-section::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #d5d5d5, #aaa);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
+  z-index: 2;
+}
+.brands-matrix-section::before { top: 24px; left: 24px; }
+.brands-matrix-section::after { top: 24px; right: 24px; }
+
+/* ── Header ── */
+.brands-matrix-header {
+  text-align: center;
+  margin-bottom: clamp(3rem, 6vw, 5rem);
+}
+
+.brands-matrix-label {
+  font-family: 'Courier New', monospace;
+  font-size: 0.65rem;
+  color: var(--clr-orange);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.brands-matrix-label::before,
+.brands-matrix-label::after {
+  content: '';
+  width: 24px;
+  height: 1px;
+  background: var(--clr-orange);
+}
+
+.brands-matrix-title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  color: #111;
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+.brands-matrix-title .accent {
+  color: var(--clr-orange);
+}
+
+/* ── Grid ── */
+.brands-matrix-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(0.75rem, 1.5vw, 1.25rem);
+}
+
+@media (max-width: 1024px) {
+  .brands-matrix-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 640px) {
+  .brands-matrix-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ══════════════════════════════════════
+   Institutional Plaque
+   ══════════════════════════════════════ */
+.brand-cell {
+  position: relative;
+  background: linear-gradient(170deg, #ffffff 0%, #f7f7f7 50%, #f0f0f0 100%);
+  border: 1px solid #d8d8d8;
+  border-radius: 6px;
+
+  /* Raised plaque shadow */
+  box-shadow:
+    0 2px 6px rgba(0,0,0,0.08),
+    0 6px 16px rgba(0,0,0,0.04),
+    inset 0 1px 0 rgba(255,255,255,0.9);
+
+  padding: clamp(1.5rem, 3vw, 2rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-height: 160px;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  transform-style: preserve-3d;
+  will-change: transform;
+  overflow: hidden;
+}
+
+/* Subtle horizontal grain */
+.brand-cell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 1px,
+      rgba(0,0,0,0.008) 1px,
+      rgba(0,0,0,0.008) 2px
+    );
+  pointer-events: none;
+  border-radius: 6px;
+}
+
+/* Hover — plaque lifts */
+.brand-cell:hover {
+  box-shadow:
+    0 8px 24px rgba(0,0,0,0.1),
+    0 16px 40px rgba(0,0,0,0.05),
+    inset 0 1px 0 rgba(255,255,255,1);
+  border-color: rgba(247,188,33,0.3);
+  z-index: 2;
+}
+
+/* Lit state */
+.brand-cell.lit {
+  border-color: rgba(247,188,33,0.2);
+}
+
+/* ── Mounting screws ── */
+.brand-cell-screw {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #e0e0e0, #b0b0b0);
+  box-shadow: inset 0 1px 1px rgba(0,0,0,0.25);
+}
+.brand-cell-screw.tl { top: 7px; left: 7px; }
+.brand-cell-screw.tr { top: 7px; right: 7px; }
+.brand-cell-screw.bl { bottom: 7px; left: 7px; }
+.brand-cell-screw.br { bottom: 7px; right: 7px; }
+
+/* ── Logo ── */
+.brand-cell-logo {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  filter: grayscale(100%) opacity(0.5);
+  transition: filter 0.4s ease;
+  flex-shrink: 0;
+}
+.brand-cell:hover .brand-cell-logo,
+.brand-cell.lit .brand-cell-logo {
+  filter: grayscale(0%) opacity(1);
+}
+
+/* Fallback monogram when logo fails */
+.brand-cell-monogram {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  color: #bbb;
+  border: 1px solid #e0e0e0;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.02);
+  transition: all 0.4s;
+  flex-shrink: 0;
+}
+.brand-cell:hover .brand-cell-monogram,
+.brand-cell.lit .brand-cell-monogram {
+  color: var(--clr-orange);
+  border-color: rgba(247,188,33,0.3);
+  background: rgba(247,188,33,0.04);
+}
+
+/* ── Brand Name ── */
+.brand-cell-name {
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 1.8vw, 1.3rem);
+  color: #888;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: center;
+  line-height: 1.2;
+  transition: color 0.35s;
+}
+.brand-cell:hover .brand-cell-name,
+.brand-cell.lit .brand-cell-name {
+  color: #111;
+}
+
+/* ── Divider line ── */
+.brand-cell-divider {
+  width: 24px;
+  height: 1px;
+  background: #ddd;
+  transition: all 0.35s;
+}
+.brand-cell:hover .brand-cell-divider,
+.brand-cell.lit .brand-cell-divider {
+  width: 36px;
+  background: var(--clr-orange);
+}
+
+/* ── Footer: category + established ── */
+.brand-cell-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.brand-cell-cat {
+  font-family: 'Courier New', monospace;
+  font-size: 0.55rem;
+  color: #bbb;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+  transition: color 0.35s;
+}
+.brand-cell:hover .brand-cell-cat,
+.brand-cell.lit .brand-cell-cat {
+  color: var(--clr-orange);
+}
+
+.brand-cell-est {
+  font-family: 'Courier New', monospace;
+  font-size: 0.5rem;
+  color: #ccc;
+  letter-spacing: 0.1em;
+  transition: color 0.35s;
+}
+.brand-cell:hover .brand-cell-est,
+.brand-cell.lit .brand-cell-est {
+  color: #999;
+}
+
+/* ── Distribuidor badge ── */
+.brand-cell-badge {
+  position: absolute;
+  bottom: 6px;
+  right: 8px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.4rem;
+  color: transparent;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  transition: color 0.35s;
+}
+.brand-cell:hover .brand-cell-badge {
+  color: rgba(247,188,33,0.4);
+}
+
+/* ── CTA ── */
+.brands-matrix-cta {
+  text-align: center;
+  margin-top: clamp(2rem, 4vw, 3rem);
+}
+
+.brands-matrix-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.85rem 2rem;
+  background: transparent;
+  color: #333;
+  font-weight: 600;
+  font-size: 0.85rem;
+  border: 1px solid #bbb;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.brands-matrix-btn:hover {
+  border-color: var(--clr-orange);
+  color: var(--clr-orange);
+  transform: translateY(-2px);
+}
+
+/* ── Mobile ── */
+@media (max-width: 640px) {
+  .brand-cell { min-height: 140px; }
+  .brand-cell-name { font-size: 0.95rem; }
+  .brand-cell-logo { width: 44px; height: 44px; }
+  .brand-cell-monogram { width: 44px; height: 44px; font-size: 1.3rem; }
+  .brand-cell-screw { width: 4px; height: 4px; }
+  .brands-matrix-section::before,
+  .brands-matrix-section::after { display: none; }
+}

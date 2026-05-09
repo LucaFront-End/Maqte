@@ -1,0 +1,113 @@
+/* ─── MARCAS CSS ─────────────────────────────────────── */
+
+.marcas-all-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.marca-card {
+  background: var(--clr-surface);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: all 0.3s var(--ease-out);
+}
+.marca-card:hover {
+  border-color: var(--clr-orange);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-card);
+}
+
+.marca-card-logo {
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--clr-surface-2);
+  border-bottom: 1px solid var(--clr-border);
+}
+
+.marca-card-name {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  color: var(--clr-text);
+  letter-spacing: 0.04em;
+}
+
+.marca-card-body {
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.marca-card-cat {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--clr-orange);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.marca-card-link {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  color: var(--clr-text-2);
+  transition: color 0.2s;
+}
+.marca-card-link:hover { color: var(--clr-orange); }
+
+/* Groups */
+.marcas-cat-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.marcas-group {
+  padding: 1.5rem;
+  background: var(--clr-surface);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-lg);
+}
+
+.marcas-group-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.marcas-group-icon {
+  font-size: 1.4rem;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--cat-accent) 12%, transparent);
+  border-radius: var(--radius-sm);
+}
+
+.marcas-group-name {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.marcas-group-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.marcas-chip {
+  padding: 0.3rem 0.75rem;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--clr-border);
+  border-radius: 999px;
+  font-size: 0.78rem;
+  color: var(--clr-text-2);
+}

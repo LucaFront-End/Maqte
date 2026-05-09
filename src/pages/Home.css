@@ -1,0 +1,145 @@
+/* ─── HOME CSS ──────────────────────────────────────────── */
+
+/* Utility */
+.text-orange { color: var(--clr-orange); }
+
+/* Old Hero CSS removed — now in HeroHud.css */
+
+/* ══════════════════════════════════════════════════════════
+   BRANDS MARQUEE
+   ══════════════════════════════════════════════════════════ */
+.brands-marquee-section {
+  padding: 1.5rem 0;
+}
+.brands-track { padding: 1rem 0; }
+.brands-inner { gap: 2.5rem; }
+
+.brand-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  letter-spacing: 0.06em;
+  color: var(--clr-text-2);
+  white-space: nowrap;
+  transition: color 0.2s;
+}
+.brand-chip:hover { color: var(--clr-orange); }
+.brand-chip-dot {
+  width: 4px;
+  height: 4px;
+  background: var(--clr-orange);
+  border-radius: 50%;
+  opacity: 0.5;
+}
+
+/* Old Categories CSS removed — now in CoverFlow.css */
+
+
+/* Old Stats CSS removed — now in Odometer.css */
+
+/* Old Why Us CSS removed — now in WhySticky.css */
+
+/* Old Brands CSS removed — now in BrandsMatrix.css */
+
+/* ══════════════════════════════════════════════════════════
+   CLOSING CTA — Modern & Simple
+   ══════════════════════════════════════════════════════════ */
+.closing-cta {
+  position: relative;
+  padding: clamp(5rem, 10vw, 7rem) 0;
+  background: #111;
+  overflow: hidden;
+}
+
+.closing-cta-grid-bg {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+}
+
+.closing-cta-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.5rem;
+}
+
+.closing-cta-label {
+  font-family: 'Courier New', monospace;
+  font-size: 0.65rem;
+  color: var(--clr-orange);
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.closing-cta-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  color: white;
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+.closing-cta-title .accent { color: var(--clr-orange); }
+
+.closing-cta-desc {
+  font-size: 0.95rem;
+  color: rgba(255,255,255,0.5);
+  max-width: 480px;
+  margin-top: 0.5rem;
+}
+
+.closing-cta-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.closing-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 6px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.25s;
+  border: none;
+}
+
+.closing-cta-btn.primary {
+  background: var(--clr-orange);
+  color: white;
+}
+.closing-cta-btn.primary:hover {
+  box-shadow: 0 6px 20px rgba(247,188,33,0.35);
+  transform: translateY(-2px);
+}
+
+.closing-cta-btn.secondary {
+  background: transparent;
+  color: rgba(255,255,255,0.6);
+  border: 1px solid rgba(255,255,255,0.15);
+}
+.closing-cta-btn.secondary:hover {
+  color: white;
+  border-color: rgba(255,255,255,0.3);
+}
+
