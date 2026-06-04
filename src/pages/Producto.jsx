@@ -170,7 +170,7 @@ export default function Producto() {
   const inStock = product.stock?.inStock !== false;
   const productName = product.name || 'Producto';
 
-  const whatsappMsg = `Hola, me interesa el producto: ${productName}${brand ? ` (${brand})` : ''} - ${priceStr}. ¿Está disponible?`;
+  const whatsappMsg = `SW- Quisiera más información de sus productos. Me interesa: ${productName}${brand ? ` (${brand})` : ''} - ${priceStr}. ¿Está disponible?`;
 
   const FEATURES = [
     { icon: Truck, label: 'Envío gratis', desc: 'A todo Colombia' },

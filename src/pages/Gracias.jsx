@@ -69,7 +69,7 @@ export default function Gracias() {
             </Link>
 
             <a
-              href={`https://wa.me/${BRAND.whatsapp}?text=Hola, acabo de realizar una compra en su web. Quiero confirmar mi pedido.`}
+              href={`https://wa.me/${BRAND.whatsapp}?text=SW- Quisiera más información de sus productos. Acabo de realizar una compra en su web y quiero confirmar mi pedido.`}
               target="_blank"
               rel="noreferrer"
               style={{

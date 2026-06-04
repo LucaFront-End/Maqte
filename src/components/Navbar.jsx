@@ -61,7 +61,7 @@ export default function Navbar() {
       <div className="navbar-topbar">
         <div className="container navbar-topbar-inner">
           <span className="navbar-topbar-msg">
-            <Zap size={12} /> Envíos a todo Colombia — <a href={`https://wa.me/${BRAND.whatsapp}`} target="_blank" rel="noreferrer">Contáctanos por WhatsApp</a>
+            <Zap size={12} /> Envíos a todo Colombia — <a href={`https://wa.me/${BRAND.whatsapp}?text=SW- Quisiera más información de sus productos.`} target="_blank" rel="noreferrer">Contáctanos por WhatsApp</a>
           </span>
           <a href={`tel:${BRAND.phone}`} className="navbar-topbar-phone">
             <Phone size={12} /> {BRAND.phone}
@@ -172,7 +172,7 @@ export default function Navbar() {
                 Carrito {cartCount > 0 && `(${cartCount})`}
               </NavLink>
               <a
-                href={`https://wa.me/${BRAND.whatsapp}`}
+                href={`https://wa.me/${BRAND.whatsapp}?text=SW- Quisiera más información de sus productos.`}
                 className="btn btn-primary"
                 target="_blank"
                 rel="noreferrer"

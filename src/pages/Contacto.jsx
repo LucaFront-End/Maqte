@@ -81,7 +81,7 @@ export default function Contacto() {
 
             {/* WhatsApp CTA */}
             <a
-              href={`https://wa.me/${BRAND.whatsapp}?text=Hola, me comunico desde el sitio web`}
+              href={`https://wa.me/${BRAND.whatsapp}?text=SW- Quisiera más información de sus productos.`}
               target="_blank"
               rel="noreferrer"
               className="whatsapp-cta reveal contact-reveal reveal-delay-5"

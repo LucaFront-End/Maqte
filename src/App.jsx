@@ -28,7 +28,7 @@ function ScrollToTop() {
 function WhatsAppFloat() {
   return (
     <a
-      href={`https://wa.me/${BRAND.whatsapp}?text=Hola, me comunico desde la web de Maqte Colombia`}
+      href={`https://wa.me/${BRAND.whatsapp}?text=SW- Quisiera más información de sus productos.`}
       target="_blank"
       rel="noreferrer"
       className="whatsapp-float"

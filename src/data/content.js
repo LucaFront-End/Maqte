@@ -10,8 +10,8 @@ export const BRAND = {
   subtagline: "Maquinaria, Herramientas y Ferretería para Profesionales",
   description:
     "Distribuidores oficiales de las marcas más poderosas del mercado industrial. Tu aliado en construcción, agro y ferretería desde el corazón de Colombia.",
-  phone: "+57 300 000 0000",
-  whatsapp: "573000000000",
+  phone: "+57 311 431 4547",
+  whatsapp: "573114314547",
   email: "info@maqtecolombia.co",
   address: "Florencia, Caquetá, Colombia",
   socials: {

@@ -1194,7 +1194,7 @@ function CtaBand() {
         </p>
         <div className="closing-cta-actions">
           <a
-            href={`https://wa.me/${BRAND.whatsapp}?text=Hola, me interesa una cotización`}
+            href={`https://wa.me/${BRAND.whatsapp}?text=SW- Quisiera más información de sus productos. Me interesa una cotización`}
             target="_blank"
             rel="noreferrer"
             className="closing-cta-btn primary"
