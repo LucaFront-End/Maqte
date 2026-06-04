@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
+import { WixCartProvider } from './context/WixCartContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -9,6 +10,8 @@ import Marcas from './pages/Marcas';
 import Categorias from './pages/Categorias';
 import Contacto from './pages/Contacto';
 import Producto from './pages/Producto';
+import Carrito from './pages/Carrito';
+import Gracias from './pages/Gracias';
 
 // Floating WhatsApp Button
 import { MessageCircle } from 'lucide-react';
@@ -49,7 +52,9 @@ function AppLayout() {
         <Route path="/marcas" element={<Marcas />} />
         <Route path="/categorias" element={<Categorias />} />
         <Route path="/contacto" element={<Contacto />} />
-        <Route path="/producto/:id" element={<Producto />} />
+        <Route path="/producto/:slug" element={<Producto />} />
+        <Route path="/carrito" element={<Carrito />} />
+        <Route path="/gracias" element={<Gracias />} />
         <Route path="*" element={<Home />} />
       </Routes>
       <Footer />
@@ -61,7 +66,9 @@ function AppLayout() {
 export default function App() {
   return (
     <BrowserRouter>
-      <AppLayout />
+      <WixCartProvider>
+        <AppLayout />
+      </WixCartProvider>
     </BrowserRouter>
   );
 }

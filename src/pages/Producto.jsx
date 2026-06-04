@@ -1,26 +1,157 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Star, ShoppingCart, Truck, Shield, RotateCcw,
-  Phone, MessageCircle, ChevronRight, Minus, Plus, Share2,
-  Heart, CheckCircle, Package, Zap
+  Phone, MessageCircle, ChevronRight, Share2,
+  Heart, CheckCircle, Package, Zap, Loader, ImageOff
 } from 'lucide-react';
+import { useWixClient } from '../hooks/useWixClient';
 import { BRAND } from '../data/content';
-import { PRODUCTS, formatPrice } from './Tienda';
+import { getProductImageUrl, getAllProductImages, getWixImageUrl } from '../lib/wixImageUrl';
+import AddToCartButton from '../components/AddToCartButton';
+import { formatPrice } from './Tienda';
 import './Producto.css';
 
-export default function Producto() {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const product = PRODUCTS.find(p => p.id === id);
-  const [qty, setQty] = useState(1);
-  const [activeTab, setActiveTab] = useState('desc');
+/* ─── Helpers ──────────────────────────────────────────── */
+function getProductPrice(product) {
+  if (product?.priceData?.price) return product.priceData.price;
+  if (product?.price?.price) return product.price.price;
+  return 0;
+}
 
+function getFormattedPrice(product) {
+  const price = getProductPrice(product);
+  if (price) return formatPrice(price);
+  if (product?.priceData?.formatted?.price) return product.priceData.formatted.price;
+  return 'Consultar precio';
+}
+
+function stripHtml(html) {
+  if (!html) return '';
+  return html.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+}
+
+export default function Producto() {
+  const { slug } = useParams();
+  const navigate = useNavigate();
+  const { wixClient, isReady } = useWixClient();
+
+  const [product, setProduct] = useState(null);
+  const [related, setRelated] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('desc');
+  const [activeImage, setActiveImage] = useState(0);
+
+  // ── Fetch product by slug ──────────────────────────────
+  const fetchProduct = useCallback(async () => {
+    if (!isReady || !wixClient || !slug) return;
+    setIsLoading(true);
+
+    try {
+      // Try exact slug match
+      const result = await wixClient.products
+        .queryProducts()
+        .eq('slug', slug)
+        .limit(1)
+        .find();
+
+      let foundProduct = result.items[0] || null;
+
+      // Fallback: try matching by _id (in case slug is actually an ID)
+      if (!foundProduct) {
+        try {
+          const byId = await wixClient.products
+            .queryProducts()
+            .eq('_id', slug)
+            .limit(1)
+            .find();
+          foundProduct = byId.items[0] || null;
+        } catch {
+          // Not a valid ID, that's ok
+        }
+      }
+
+      // Fallback: normalize slug comparison (strip accents)
+      if (!foundProduct) {
+        const normalizedInput = slug
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .toLowerCase();
+
+        let skip = 0;
+        const pageSize = 100;
+        while (true) {
+          const page = await wixClient.products
+            .queryProducts()
+            .limit(pageSize)
+            .skip(skip)
+            .find();
+
+          const match = page.items.find(p => {
+            const normalizedSlug = (p.slug || '')
+              .normalize('NFD')
+              .replace(/[\u0300-\u036f]/g, '')
+              .toLowerCase();
+            return normalizedSlug === normalizedInput;
+          });
+
+          if (match) {
+            foundProduct = match;
+            break;
+          }
+          if (page.items.length < pageSize) break;
+          skip += pageSize;
+        }
+      }
+
+      setProduct(foundProduct);
+
+      // Fetch related products
+      if (foundProduct) {
+        try {
+          const relatedResult = await wixClient.products
+            .queryProducts()
+            .ne('_id', foundProduct._id)
+            .limit(4)
+            .find();
+          setRelated(relatedResult.items || []);
+        } catch {
+          setRelated([]);
+        }
+      }
+    } catch (err) {
+      console.error('[Producto] Error fetching product:', err);
+      setProduct(null);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [wixClient, isReady, slug]);
+
+  useEffect(() => {
+    fetchProduct();
+  }, [fetchProduct]);
+
+  // ── Loading State ──────────────────────────────────────
+  if (isLoading) {
+    return (
+      <main className="producto-page">
+        <div className="container" style={{ padding: '8rem 0', textAlign: 'center' }}>
+          <Loader size={40} className="spin" style={{ color: 'var(--clr-orange)' }} />
+          <p style={{ color: 'var(--clr-text-3)', marginTop: '1rem' }}>Cargando producto...</p>
+        </div>
+      </main>
+    );
+  }
+
+  // ── Not Found ──────────────────────────────────────────
   if (!product) {
     return (
       <main className="producto-page">
         <div className="container" style={{ padding: '6rem 0', textAlign: 'center' }}>
           <h2 className="heading-lg">Producto no encontrado</h2>
+          <p style={{ color: 'var(--clr-text-3)', margin: '1rem 0 2rem' }}>
+            El producto que buscas no está disponible o fue eliminado.
+          </p>
           <Link to="/tienda" className="producto-back-btn" style={{ marginTop: '2rem', display: 'inline-flex' }}>
             <ArrowLeft size={16} /> Volver a la tienda
           </Link>
@@ -29,13 +160,17 @@ export default function Producto() {
     );
   }
 
-  const related = PRODUCTS.filter(p => p.id !== product.id && p.category === product.category).slice(0, 4);
-  if (related.length < 4) {
-    const extra = PRODUCTS.filter(p => p.id !== product.id && !related.includes(p)).slice(0, 4 - related.length);
-    related.push(...extra);
-  }
+  // ── Product Data ───────────────────────────────────────
+  const images = getAllProductImages(product);
+  const mainImage = images[activeImage] || getProductImageUrl(product) || '/images/placeholder.png';
+  const price = getProductPrice(product);
+  const priceStr = getFormattedPrice(product);
+  const description = stripHtml(product.description);
+  const brand = product.brand || '';
+  const inStock = product.stock?.inStock !== false;
+  const productName = product.name || 'Producto';
 
-  const whatsappMsg = `Hola, me interesa el producto: ${product.name} (${product.brand}) - ${formatPrice(product.price)}. ¿Está disponible?`;
+  const whatsappMsg = `Hola, me interesa el producto: ${productName}${brand ? ` (${brand})` : ''} - ${priceStr}. ¿Está disponible?`;
 
   const FEATURES = [
     { icon: Truck, label: 'Envío gratis', desc: 'A todo Colombia' },
@@ -53,9 +188,13 @@ export default function Producto() {
           <ChevronRight size={12} />
           <Link to="/tienda">Tienda</Link>
           <ChevronRight size={12} />
-          <span>{product.brand}</span>
-          <ChevronRight size={12} />
-          <span className="current">{product.name}</span>
+          {brand && (
+            <>
+              <span>{brand}</span>
+              <ChevronRight size={12} />
+            </>
+          )}
+          <span className="current">{productName}</span>
         </div>
       </div>
 
@@ -65,64 +204,103 @@ export default function Producto() {
           {/* Gallery */}
           <div className="producto-gallery">
             <div className="producto-gallery-main">
-              <img src={product.img} alt={product.name} />
+              <img src={mainImage} alt={productName} />
             </div>
-            <div className="producto-gallery-thumbs">
-              <div className="producto-thumb active">
-                <img src={product.img} alt={product.name} />
+            {images.length > 1 && (
+              <div className="producto-gallery-thumbs">
+                {images.map((img, i) => (
+                  <div
+                    key={i}
+                    className={`producto-thumb ${i === activeImage ? 'active' : ''}`}
+                    onClick={() => setActiveImage(i)}
+                  >
+                    <img src={img} alt={`${productName} - ${i + 1}`} />
+                  </div>
+                ))}
               </div>
-              <div className="producto-thumb">
-                <img src={product.img} alt={product.name} style={{ opacity: 0.6 }} />
-              </div>
-              <div className="producto-thumb">
-                <img src={product.img} alt={product.name} style={{ opacity: 0.4 }} />
-              </div>
-            </div>
+            )}
           </div>
 
           {/* Info */}
           <div className="producto-info">
-            <span className="producto-brand-tag">{product.brand}</span>
-            <h1 className="producto-title">{product.name}</h1>
+            {brand && <span className="producto-brand-tag">{brand}</span>}
+            <h1 className="producto-title">{productName}</h1>
 
             <div className="producto-rating-row">
-              <div className="producto-stars">
-                {[1,2,3,4,5].map(s => (
-                  <Star key={s} size={14} fill={s <= Math.round(product.rating) ? '#F7BC21' : 'none'} stroke={s <= Math.round(product.rating) ? 'none' : 'var(--clr-text-3)'} />
-                ))}
-              </div>
-              <span className="producto-rating-text">{product.rating} ({product.reviews} reseñas)</span>
-              <span className="producto-stock"><CheckCircle size={12} /> En stock</span>
+              <span className={`producto-stock ${inStock ? '' : 'out'}`}>
+                {inStock ? (
+                  <><CheckCircle size={12} /> En stock</>
+                ) : (
+                  <><ImageOff size={12} /> Sin stock</>
+                )}
+              </span>
+              {product.sku && (
+                <span style={{ color: 'var(--clr-text-3)', fontSize: '0.8rem' }}>
+                  SKU: {product.sku}
+                </span>
+              )}
             </div>
 
             <div className="producto-price-block">
-              <span className="producto-price">{formatPrice(product.price)}</span>
+              <span className="producto-price">{priceStr}</span>
+              {product.priceData?.discountedPrice && product.priceData.discountedPrice < price && (
+                <span className="producto-original-price">
+                  {formatPrice(price)}
+                </span>
+              )}
               <span className="producto-tax">IVA incluido</span>
             </div>
 
-            <p className="producto-desc">{product.desc}</p>
+            {description && (
+              <p className="producto-desc">
+                {description.length > 220 ? (
+                  <>
+                    {description.substring(0, 220)}...{' '}
+                    <a
+                      href="#producto-tabs"
+                      className="producto-desc-more-link"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setActiveTab('desc');
+                        document.getElementById('producto-tabs')?.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                    >
+                      Ver más
+                    </a>
+                  </>
+                ) : (
+                  description
+                )}
+              </p>
+            )}
 
-            {/* Quantity + CTA */}
-            <div className="producto-actions">
-              <div className="producto-qty">
-                <button onClick={() => setQty(q => Math.max(1, q - 1))} className="producto-qty-btn"><Minus size={14} /></button>
-                <span className="producto-qty-num">{qty}</span>
-                <button onClick={() => setQty(q => q + 1)} className="producto-qty-btn"><Plus size={14} /></button>
-              </div>
+            {/* Add to Cart */}
+            {inStock && (
+              <AddToCartButton productId={product._id} productName={productName} />
+            )}
+
+            {/* Secondary actions */}
+            <div className="producto-secondary-actions">
               <a
                 href={`https://wa.me/${BRAND.whatsapp}?text=${encodeURIComponent(whatsappMsg)}`}
                 target="_blank"
                 rel="noreferrer"
-                className="producto-cta-btn"
+                className="producto-sec-btn"
               >
-                <ShoppingCart size={18} /> Cotizar por WhatsApp
+                <MessageCircle size={14} /> WhatsApp
               </a>
-            </div>
-
-            <div className="producto-secondary-actions">
-              <button className="producto-sec-btn"><Heart size={14} /> Guardar</button>
-              <button className="producto-sec-btn"><Share2 size={14} /> Compartir</button>
-              <a href={`tel:${BRAND.phone}`} className="producto-sec-btn"><Phone size={14} /> Llamar</a>
+              <button className="producto-sec-btn" onClick={() => {
+                if (navigator.share) {
+                  navigator.share({ title: productName, url: window.location.href });
+                } else {
+                  navigator.clipboard.writeText(window.location.href);
+                }
+              }}>
+                <Share2 size={14} /> Compartir
+              </button>
+              <a href={`tel:${BRAND.phone}`} className="producto-sec-btn">
+                <Phone size={14} /> Llamar
+              </a>
             </div>
 
             {/* Trust Badges */}
@@ -142,7 +320,7 @@ export default function Producto() {
       </section>
 
       {/* Tabs */}
-      <section className="producto-tabs-section">
+      <section className="producto-tabs-section" id="producto-tabs">
         <div className="container">
           <div className="producto-tabs">
             {[
@@ -164,14 +342,17 @@ export default function Producto() {
             {activeTab === 'desc' && (
               <div className="producto-tab-panel">
                 <h3>Acerca de este producto</h3>
-                <p>{product.desc}</p>
-                <p>Producto original {product.brand} con garantía de fábrica. Respaldado por la red de distribución de Maqte Colombia con soporte técnico y repuestos disponibles.</p>
-                <ul>
-                  <li>Producto 100% original con certificación de marca</li>
-                  <li>Garantía de 1 año por defectos de fabricación</li>
-                  <li>Soporte técnico especializado</li>
-                  <li>Repuestos y accesorios disponibles</li>
-                </ul>
+                {product.description ? (
+                  <div dangerouslySetInnerHTML={{ __html: product.description }} />
+                ) : (
+                  <p>{description || 'Sin descripción disponible.'}</p>
+                )}
+                {product.additionalInfoSections?.map((section, i) => (
+                  <div key={i}>
+                    <h4>{section.title}</h4>
+                    <div dangerouslySetInnerHTML={{ __html: section.description }} />
+                  </div>
+                ))}
               </div>
             )}
             {activeTab === 'specs' && (
@@ -179,12 +360,17 @@ export default function Producto() {
                 <h3>Especificaciones técnicas</h3>
                 <table className="producto-specs-table">
                   <tbody>
-                    <tr><td>Marca</td><td>{product.brand}</td></tr>
-                    <tr><td>Modelo</td><td>{product.name}</td></tr>
-                    <tr><td>Categoría</td><td style={{ textTransform: 'capitalize' }}>{product.category}</td></tr>
-                    <tr><td>Garantía</td><td>1 año de fábrica</td></tr>
-                    <tr><td>Condición</td><td>Nuevo, sellado de fábrica</td></tr>
-                    <tr><td>Certificación</td><td>Original {product.brand}</td></tr>
+                    {brand && <tr><td>Marca</td><td>{brand}</td></tr>}
+                    <tr><td>Modelo</td><td>{productName}</td></tr>
+                    {product.sku && <tr><td>SKU</td><td>{product.sku}</td></tr>}
+                    {product.weight && <tr><td>Peso</td><td>{product.weight} kg</td></tr>}
+                    <tr><td>Disponibilidad</td><td>{inStock ? 'En stock' : 'Agotado'}</td></tr>
+                    {product.productOptions?.map((opt, i) => (
+                      <tr key={i}>
+                        <td>{opt.name}</td>
+                        <td>{opt.choices?.map(c => c.value).join(', ')}</td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
@@ -216,32 +402,40 @@ export default function Producto() {
       </section>
 
       {/* Related Products */}
-      <section className="producto-related section-pad">
-        <div className="container">
-          <h2 className="heading-lg" style={{ marginBottom: '1.5rem' }}>
-            Productos <span style={{ color: 'var(--clr-orange)' }}>relacionados</span>
-          </h2>
-          <div className="producto-related-grid">
-            {related.map(p => (
-              <Link to={`/producto/${p.id}`} key={p.id} className="producto-related-card">
-                <div className="producto-related-img">
-                  <img src={p.img} alt={p.name} loading="lazy" />
-                </div>
-                <div className="producto-related-info">
-                  <span className="producto-related-brand">{p.brand}</span>
-                  <h4 className="producto-related-name">{p.name}</h4>
-                  <div className="producto-related-bottom">
-                    <span className="producto-related-price">{formatPrice(p.price)}</span>
-                    <span className="producto-related-rating">
-                      <Star size={10} fill="#F7BC21" stroke="none" /> {p.rating}
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            ))}
+      {related.length > 0 && (
+        <section className="producto-related section-pad">
+          <div className="container">
+            <h2 className="heading-lg" style={{ marginBottom: '1.5rem' }}>
+              Productos <span style={{ color: 'var(--clr-orange)' }}>relacionados</span>
+            </h2>
+            <div className="producto-related-grid">
+              {related.map(p => {
+                const relImg = getProductImageUrl(p) || '/images/placeholder.png';
+                const relSlug = p.slug || p._id;
+                const relBrand = p.brand || '';
+                const relPrice = getProductPrice(p);
+
+                return (
+                  <Link to={`/producto/${relSlug}`} key={p._id} className="producto-related-card">
+                    <div className="producto-related-img">
+                      <img src={relImg} alt={p.name} loading="lazy" />
+                    </div>
+                    <div className="producto-related-info">
+                      {relBrand && <span className="producto-related-brand">{relBrand}</span>}
+                      <h4 className="producto-related-name">{p.name}</h4>
+                      <div className="producto-related-bottom">
+                        <span className="producto-related-price">
+                          {relPrice ? formatPrice(relPrice) : 'Consultar'}
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
     </main>
   );
 }

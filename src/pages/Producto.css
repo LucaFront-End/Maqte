@@ -57,52 +57,61 @@
 }
 
 .producto-gallery-main {
-  background: #f5f5f5;
-  border: 1px solid #eee;
-  border-radius: 14px;
+  background: #ffffff;
+  border: 1px solid #e8e8e8;
+  border-radius: 16px;
   aspect-ratio: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   overflow: hidden;
+  position: relative;
 }
 .producto-gallery-main img {
-  width: 70%;
-  height: 70%;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s var(--ease-out);
+}
+/* PNG/WEBP: contain so product isn't cropped */
+.producto-gallery-main img[src$=".png"],
+.producto-gallery-main img[src$=".webp"] {
   object-fit: contain;
-  transition: transform 0.4s var(--ease-out);
+  padding: 8%;
+  background: #ffffff;
 }
 .producto-gallery-main:hover img {
-  transform: scale(1.08);
+  transform: scale(1.04);
 }
 
 .producto-gallery-thumbs {
   display: flex;
   gap: 0.5rem;
+  flex-wrap: wrap;
 }
 .producto-thumb {
-  width: 68px;
-  height: 68px;
-  border: 1.5px solid #e0e0e0;
-  border-radius: 8px;
-  background: #f9f9f9;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  background: #ffffff;
   cursor: pointer;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
   overflow: hidden;
 }
 .producto-thumb img {
-  width: 60%;
-  height: 60%;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.producto-thumb img[src$=".png"],
+.producto-thumb img[src$=".webp"] {
   object-fit: contain;
+  padding: 10%;
 }
 .producto-thumb.active {
   border-color: var(--clr-orange);
+  box-shadow: 0 0 0 3px rgba(247,188,33,0.2);
 }
-.producto-thumb:hover {
-  border-color: #ccc;
+.producto-thumb:hover:not(.active) {
+  border-color: #bbb;
 }
 
 /* ── Info Panel ── */
@@ -150,7 +159,15 @@
   font-size: 0.73rem;
   color: #22C55E;
   font-weight: 600;
-  margin-left: auto;
+  background: rgba(34, 197, 94, 0.08);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+}
+.producto-stock.out {
+  color: #EF4444;
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.2);
 }
 
 /* Price */
@@ -158,19 +175,25 @@
   display: flex;
   align-items: baseline;
   gap: 0.75rem;
-  margin: 0.5rem 0;
-  padding: 0.85rem 0;
+  padding: 1rem 0;
   border-top: 1px solid #eee;
   border-bottom: 1px solid #eee;
+  margin: 0.25rem 0 0.5rem;
 }
 .producto-price {
   font-family: var(--font-display);
-  font-size: 2rem;
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
   color: var(--clr-orange);
+  letter-spacing: 0.01em;
 }
 .producto-tax {
   font-size: 0.73rem;
   color: #bbb;
+}
+.producto-original-price {
+  font-size: 0.95rem;
+  color: #bbb;
+  text-decoration: line-through;
 }
 
 .producto-desc {
@@ -178,6 +201,18 @@
   color: #777;
   line-height: 1.6;
   margin: 0.15rem 0;
+}
+.producto-desc-more-link {
+  color: var(--clr-orange);
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+  margin-left: 0.25rem;
+  font-size: 0.85rem;
+  display: inline-block;
+}
+.producto-desc-more-link:hover {
+  color: #111;
 }
 
 /* ── Actions ── */
@@ -362,13 +397,22 @@
 }
 .producto-tab-panel p {
   font-size: 0.88rem;
-  color: #777;
+  color: #555;
   line-height: 1.7;
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.85rem;
+}
+.producto-tab-panel strong {
+  font-weight: 700;
+  color: #111;
+}
+.producto-tab-panel br {
+  display: block;
+  content: "";
+  margin-top: 0.5rem;
 }
 .producto-tab-panel ul {
-  list-style: none;
-  padding: 0;
+  list-style-type: disc;
+  padding-left: 1.25rem;
   margin: 0.6rem 0;
   display: flex;
   flex-direction: column;
@@ -376,16 +420,13 @@
 }
 .producto-tab-panel li {
   font-size: 0.85rem;
-  color: #666;
-  padding-left: 1.25rem;
+  color: #555;
+  padding-left: 0.25rem;
   position: relative;
+  list-style: disc;
 }
-.producto-tab-panel li::before {
-  content: '✓';
-  position: absolute;
-  left: 0;
+.producto-tab-panel li::marker {
   color: var(--clr-orange);
-  font-weight: 700;
 }
 
 /* Specs Table */
@@ -475,16 +516,19 @@
 
 .producto-related-img {
   aspect-ratio: 1;
-  background: #f5f5f5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: #ffffff;
+  overflow: hidden;
 }
 .producto-related-img img {
-  width: 60%;
-  height: 60%;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   transition: transform 0.3s var(--ease-out);
+}
+.producto-related-img img[src$=".png"],
+.producto-related-img img[src$=".webp"] {
+  object-fit: contain;
+  padding: 10%;
 }
 .producto-related-card:hover .producto-related-img img {
   transform: scale(1.06);

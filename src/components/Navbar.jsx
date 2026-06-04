@@ -1,19 +1,22 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, NavLink, useLocation } from 'react-router-dom';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
-  Menu, X, Search, ShoppingCart, User, ChevronDown, Phone, Zap
+  Menu, X, Search, ShoppingCart, User, Phone, Zap
 } from 'lucide-react';
 import { NAV_LINKS, CATEGORIES, BRAND } from '../data/content';
 import { CategoryIcon } from './IconMap';
+import { useCart } from '../hooks/useCart';
 import './Navbar.css';
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [megaMenu, setMegaMenu] = useState(null);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const location = useLocation();
-  const timeoutRef = useRef(null);
+  const navigate = useNavigate();
+  const searchInputRef = useRef(null);
+  const { cartCount } = useCart();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -23,15 +26,33 @@ export default function Navbar() {
 
   useEffect(() => {
     setOpen(false);
-    setMegaMenu(null);
+    setSearchOpen(false);
+    setSearchQuery('');
   }, [location]);
 
-  const handleMegaEnter = (id) => {
-    clearTimeout(timeoutRef.current);
-    setMegaMenu(id);
+  const openSearch = () => {
+    setSearchOpen(true);
+    setTimeout(() => searchInputRef.current?.focus(), 50);
   };
-  const handleMegaLeave = () => {
-    timeoutRef.current = setTimeout(() => setMegaMenu(null), 120);
+
+  const handleSearch = (e) => {
+    if (e.key === 'Enter' && searchQuery.trim()) {
+      navigate(`/tienda?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchOpen(false);
+      setSearchQuery('');
+    }
+    if (e.key === 'Escape') {
+      setSearchOpen(false);
+      setSearchQuery('');
+    }
+  };
+
+  const submitSearch = () => {
+    if (searchQuery.trim()) {
+      navigate(`/tienda?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchOpen(false);
+      setSearchQuery('');
+    }
   };
 
   return (
@@ -82,7 +103,7 @@ export default function Navbar() {
           <div className="navbar-actions">
             <button
               className="navbar-action-btn"
-              onClick={() => setSearchOpen(!searchOpen)}
+              onClick={searchOpen ? submitSearch : openSearch}
               aria-label="Buscar"
             >
               <Search size={18} />
@@ -92,7 +113,9 @@ export default function Navbar() {
             </Link>
             <Link to="/carrito" className="navbar-action-btn" aria-label="Carrito">
               <ShoppingCart size={18} />
-              <span className="navbar-cart-badge">0</span>
+              {cartCount > 0 && (
+                <span className="navbar-cart-badge">{cartCount > 99 ? '99+' : cartCount}</span>
+              )}
             </Link>
             <button
               className="navbar-hamburger hide-desktop"
@@ -104,16 +127,32 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Search Bar */}
         {searchOpen && (
           <div className="navbar-search-bar">
-            <div className="container">
+            <div className="container navbar-search-inner">
+              <Search size={16} className="navbar-search-icon" />
               <input
-                className="input"
+                ref={searchInputRef}
+                className="navbar-search-input"
                 type="text"
-                placeholder="Buscar productos, marcas, categorías..."
+                placeholder="Buscar productos, marcas, categorías... (Enter para buscar)"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                onKeyDown={handleSearch}
                 autoFocus
               />
+              {searchQuery && (
+                <button className="navbar-search-clear" onClick={() => setSearchQuery('')}>
+                  <X size={14} />
+                </button>
+              )}
+              <button
+                className="navbar-search-btn"
+                onClick={submitSearch}
+                disabled={!searchQuery.trim()}
+              >
+                Buscar
+              </button>
             </div>
           </div>
         )}
@@ -129,7 +168,9 @@ export default function Navbar() {
               ))}
               <div className="navbar-mobile-divider" />
               <NavLink to="/cuenta" className="navbar-mobile-link">Mi Cuenta</NavLink>
-              <NavLink to="/carrito" className="navbar-mobile-link">Carrito (0)</NavLink>
+              <NavLink to="/carrito" className="navbar-mobile-link">
+                Carrito {cartCount > 0 && `(${cartCount})`}
+              </NavLink>
               <a
                 href={`https://wa.me/${BRAND.whatsapp}`}
                 className="btn btn-primary"
