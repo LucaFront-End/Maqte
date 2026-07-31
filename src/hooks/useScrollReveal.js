@@ -5,21 +5,33 @@ import { useEffect, useRef } from 'react';
  * Usage: pass a selector string, e.g. useScrollReveal('.reveal')
  */
 export function useScrollReveal(selector = '.reveal', options = {}) {
-  const { threshold = 0.15, rootMargin = '0px 0px -60px 0px' } = options;
+  const { threshold = 0.1, rootMargin = '0px 0px -40px 0px' } = options;
 
   useEffect(() => {
     const elements = document.querySelectorAll(selector);
+    if (!elements.length) return;
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add('visible');
+            // Auto stagger child elements if container has reveal-children
+            if (entry.target.classList.contains('reveal-children')) {
+              const children = entry.target.querySelectorAll('.reveal-child');
+              children.forEach((child, idx) => {
+                setTimeout(() => {
+                  child.classList.add('visible');
+                }, idx * 90);
+              });
+            }
             observer.unobserve(entry.target);
           }
         });
       },
       { threshold, rootMargin }
     );
+
     elements.forEach((el) => observer.observe(el));
     return () => observer.disconnect();
   }, [selector, threshold, rootMargin]);

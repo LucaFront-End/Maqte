@@ -9,6 +9,7 @@ import Nosotros from './pages/Nosotros';
 import Marcas from './pages/Marcas';
 import Categorias from './pages/Categorias';
 import Contacto from './pages/Contacto';
+import Maquinas from './pages/Maquinas';
 import Producto from './pages/Producto';
 import Carrito from './pages/Carrito';
 import Gracias from './pages/Gracias';
@@ -48,6 +49,7 @@ function AppLayout() {
         <Route path="/" element={<Home />} />
         <Route path="/tienda" element={<Tienda />} />
         <Route path="/tienda/*" element={<Tienda />} />
+        <Route path="/maquinas" element={<Maquinas />} />
         <Route path="/nosotros" element={<Nosotros />} />
         <Route path="/marcas" element={<Marcas />} />
         <Route path="/categorias" element={<Categorias />} />

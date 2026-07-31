@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
-  Menu, X, Search, ShoppingCart, User, Phone, Zap
+  Menu, X, Search, ShoppingCart, User, Phone, Zap, ChevronDown, ArrowRight
 } from 'lucide-react';
 import { NAV_LINKS, CATEGORIES, BRAND } from '../data/content';
 import { CategoryIcon } from './IconMap';
@@ -13,9 +13,12 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [megaMenuOpen, setMegaMenuOpen] = useState(false);
+  
   const location = useLocation();
   const navigate = useNavigate();
   const searchInputRef = useRef(null);
+  const megaTimeoutRef = useRef(null);
   const { cartCount } = useCart();
 
   useEffect(() => {
@@ -27,8 +30,20 @@ export default function Navbar() {
   useEffect(() => {
     setOpen(false);
     setSearchOpen(false);
+    setMegaMenuOpen(false);
     setSearchQuery('');
   }, [location]);
+
+  const handleMegaEnter = () => {
+    if (megaTimeoutRef.current) clearTimeout(megaTimeoutRef.current);
+    setMegaMenuOpen(true);
+  };
+
+  const handleMegaLeave = () => {
+    megaTimeoutRef.current = setTimeout(() => {
+      setMegaMenuOpen(false);
+    }, 200);
+  };
 
   const openSearch = () => {
     setSearchOpen(true);
@@ -88,15 +103,42 @@ export default function Navbar() {
 
           {/* Desktop Nav */}
           <nav className="navbar-nav hide-mobile">
-            {NAV_LINKS.map((link) => (
-              <NavLink
-                key={link.path}
-                to={link.path}
-                className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}
-              >
-                {link.label}
-              </NavLink>
-            ))}
+            {NAV_LINKS.map((link) => {
+              if (link.isMegaMenu) {
+                return (
+                  <div
+                    key={link.path}
+                    className="navbar-item"
+                    onMouseEnter={handleMegaEnter}
+                    onMouseLeave={handleMegaLeave}
+                  >
+                    <NavLink
+                      to={link.path}
+                      className={({ isActive }) =>
+                        `navbar-link ${isActive || megaMenuOpen ? 'active' : ''}`
+                      }
+                      onClick={() => setMegaMenuOpen(false)}
+                    >
+                      {link.label}
+                      <ChevronDown
+                        size={14}
+                        className={`navbar-chevron ${megaMenuOpen ? 'rotated' : ''}`}
+                      />
+                    </NavLink>
+                  </div>
+                );
+              }
+
+              return (
+                <NavLink
+                  key={link.path}
+                  to={link.path}
+                  className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}
+                >
+                  {link.label}
+                </NavLink>
+              );
+            })}
           </nav>
 
           {/* Actions */}
@@ -127,6 +169,7 @@ export default function Navbar() {
           </div>
         </div>
 
+        {/* Search Bar */}
         {searchOpen && (
           <div className="navbar-search-bar">
             <div className="container navbar-search-inner">
@@ -153,6 +196,61 @@ export default function Navbar() {
               >
                 Buscar
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* Expanded Mega Menu Panel */}
+        {megaMenuOpen && (
+          <div
+            className="mega-menu-overlay"
+            onMouseEnter={handleMegaEnter}
+            onMouseLeave={handleMegaLeave}
+          >
+            <div className="container mega-menu-inner">
+              <div className="mega-menu-header">
+                <h3 className="mega-menu-title">
+                  Explorar por <span style={{ color: '#F7BC21' }}>categoría</span>
+                </h3>
+              </div>
+
+              <div className="mega-menu-grid">
+                {CATEGORIES.map((cat) => (
+                  <div key={cat.id} className="mega-cat-card">
+                    <div className="mega-cat-header">
+                      <div className="mega-cat-icon-box">
+                        <CategoryIcon name={cat.icon} size={20} />
+                      </div>
+                      <div>
+                        <h4 className="mega-cat-name">{cat.label}</h4>
+                        <p className="mega-cat-desc">{cat.description}</p>
+                      </div>
+                    </div>
+
+                    <ul className="mega-cat-subs">
+                      {cat.subcategories.slice(0, 4).map((sub, sIdx) => (
+                        <li key={sIdx}>
+                          <Link
+                            to={sub.slug}
+                            className="mega-sub-link"
+                            onClick={() => setMegaMenuOpen(false)}
+                          >
+                            <span className="mega-sub-arrow">→</span> {sub.label}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <Link
+                      to={cat.slug}
+                      className="mega-cat-btn"
+                      onClick={() => setMegaMenuOpen(false)}
+                    >
+                      VER TODO <ArrowRight size={14} />
+                    </Link>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}

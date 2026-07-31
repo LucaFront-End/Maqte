@@ -68,10 +68,18 @@ export default function Tienda() {
   const [viewMode, setViewMode] = useState('grid');
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
-  // ── Sync search from URL ──────────────────────────────
+  // ── Sync search & category from URL ──────────────────
   useEffect(() => {
     const q = searchParams.get('q') || '';
-    setSearchTerm(q);
+    const cat = searchParams.get('cat') || searchParams.get('category') || '';
+    if (q) {
+      setSearchTerm(q);
+    } else if (cat) {
+      const foundCat = CATEGORIES.find(c => c.id === cat.toLowerCase() || c.label.toLowerCase() === cat.toLowerCase());
+      setSearchTerm(foundCat ? foundCat.label : cat);
+    } else {
+      setSearchTerm('');
+    }
   }, [searchParams]);
 
   // ── Fetch products + collections from Wix ─────────────
