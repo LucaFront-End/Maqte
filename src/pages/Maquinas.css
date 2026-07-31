@@ -1190,27 +1190,194 @@
 }
 
 
-/* ─── CTA BANNER ─── */
+/* ─── ULTRA PREMIUM FINAL CTA BANNER ─── */
 .maq-cta-section {
-  padding-top: 0;
+  padding-top: 1rem;
+  padding-bottom: 5rem;
 }
 
 .maq-cta-box {
-  background: linear-gradient(135deg, #F7BC21 0%, #EAB308 100%);
+  position: relative;
+  background: #0D0D0D;
+  border: 2px solid rgba(247, 188, 33, 0.35);
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5), 0 0 50px rgba(247, 188, 33, 0.12);
+}
+
+.maq-cta-bg-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 85% 40%, rgba(247, 188, 33, 0.18) 0%, transparent 65%);
+  pointer-events: none;
+}
+
+.maq-cta-inner {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 3rem;
+  padding: 3.5rem;
+  align-items: center;
+}
+
+.maq-cta-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(247, 188, 33, 0.1);
+  color: #F7BC21;
+  border: 1px solid rgba(247, 188, 33, 0.3);
+  padding: 0.4rem 0.95rem;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.75px;
+}
+
+.maq-cta-title {
+  font-size: clamp(2rem, 3.5vw, 2.75rem);
+  font-weight: 900;
+  color: #FFFFFF;
+  line-height: 1.15;
+  margin-top: 1rem;
+}
+
+.maq-cta-gold {
+  color: #F7BC21;
+  background: linear-gradient(135deg, #FFF0B3 0%, #F7BC21 50%, #D9A61C 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.maq-cta-sub {
+  color: rgba(245, 245, 245, 0.75);
+  font-size: 1.05rem;
+  line-height: 1.65;
+  margin-top: 1rem;
+  max-width: 580px;
+}
+
+.maq-cta-trust-bar {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.maq-cta-trust-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.55rem 0.9rem;
+  border-radius: var(--radius-md);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #F3F4F6;
+}
+
+.maq-cta-pill-icon {
+  color: #F7BC21;
+}
+
+/* Right Card */
+.maq-cta-action-card {
+  background: rgba(22, 22, 22, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
   border-radius: var(--radius-xl);
-  padding: 3.5rem 3rem;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+}
+
+.maq-cta-card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 2rem;
-  box-shadow: 0 12px 40px rgba(247, 188, 33, 0.25);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 1rem;
 }
 
-.maq-cta-btns {
+.maq-cta-card-badge {
   display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
-  flex-shrink: 0;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #22C55E;
+}
+
+.maq-cta-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22C55E;
+  box-shadow: 0 0 10px #22C55E;
+  animation: pulse-ring 1.8s infinite;
+}
+
+.maq-cta-card-time {
+  font-size: 0.72rem;
+  color: rgba(245, 245, 245, 0.55);
+}
+
+.maq-cta-main-btn {
+  width: 100%;
+  justify-content: center;
+  padding: 1rem 1.25rem;
+  font-size: 1rem;
+  font-weight: 800;
+  background: #F7BC21;
+  color: #0A0A0A;
+  box-shadow: 0 4px 25px rgba(247, 188, 33, 0.4);
+}
+
+.maq-cta-main-btn:hover {
+  background: #e5ad1c;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(247, 188, 33, 0.5);
+}
+
+.maq-cta-sub-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: rgba(245, 245, 245, 0.7);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.maq-cta-sub-link:hover {
+  color: #F7BC21;
+}
+
+.maq-cta-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  color: rgba(245, 245, 245, 0.5);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 0.85rem;
+}
+
+@media (max-width: 1024px) {
+  .maq-cta-inner {
+    grid-template-columns: 1fr;
+    padding: 2.5rem 2rem;
+    gap: 2rem;
+  }
 }
 
 

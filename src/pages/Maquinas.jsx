@@ -692,34 +692,70 @@ export default function Maquinas() {
         </div>
       </section>
 
-      {/* ─── BANNER FINAL DE ASESORÍA ─── */}
+      {/* ─── BANNER FINAL DE ASESORÍA Y CONVERSIÓN PREMIUM ─── */}
       <section className="section-pad maq-cta-section">
         <div className="container">
-          <div className="maq-cta-box reveal maq-reveal">
-            <div className="maq-cta-content">
-              <span className="label-upper" style={{ color: '#0A0A0A', opacity: 0.9 }}>
-                ¿Tienes dudas sobre la instalación o infraestructura?
-              </span>
-              <h2 className="heading-xl" style={{ color: '#0A0A0A', marginTop: '0.5rem' }}>
-                Hablemos con un Especialista Técnico
-              </h2>
-              <p style={{ color: 'rgba(10,10,10,0.85)', marginTop: '0.75rem', fontSize: '1.05rem', maxWidth: '600px' }}>
-                Te brindamos acompañamiento integral: diseño de planta, requerimientos eléctricos, distribución de espacio y cálculo de retorno de inversión.
-              </p>
-            </div>
-            <div className="maq-cta-btns">
-              <a
-                href={`https://wa.me/${BRAND.whatsapp}?text=SW- Hola, deseo agendar una llamada con un asesor técnico de maquinaria.`}
-                target="_blank"
-                rel="noreferrer"
-                className="btn"
-                style={{ background: '#0A0A0A', color: '#FFFFFF', fontWeight: 600 }}
-              >
-                <MessageCircle size={18} /> Agendar Asesoría por WhatsApp
-              </a>
-              <Link to="/contacto" className="btn" style={{ border: '2px solid #0A0A0A', color: '#0A0A0A', fontWeight: 600 }}>
-                Enviar Mensaje por Formulario
-              </Link>
+          <div className="maq-cta-box reveal-scale maq-reveal">
+            <div className="maq-cta-bg-glow" />
+            <div className="maq-cta-inner">
+              {/* Left Column: Information & Trust */}
+              <div className="maq-cta-left">
+                <span className="maq-cta-badge">
+                  <Zap size={14} /> Acompañamiento Técnico & Comercial Directo
+                </span>
+                <h2 className="maq-cta-title">
+                  ¿Listo para potenciar tu obra con <span className="maq-cta-gold">Maquinaria Bloquera?</span>
+                </h2>
+                <p className="maq-cta-sub">
+                  Te brindamos asesoría integral sin costo: diseño de planta, requerimientos de energía, 
+                  distribución de espacio en fábrica y proyección exacta de retorno de inversión para tu proyecto en Colombia.
+                </p>
+
+                {/* Trust Pills Bar */}
+                <div className="maq-cta-trust-bar">
+                  <div className="maq-cta-trust-pill">
+                    <Wrench size={15} className="maq-cta-pill-icon" />
+                    <span>Montaje e Instalación en Sitio</span>
+                  </div>
+                  <div className="maq-cta-trust-pill">
+                    <ShieldCheck size={15} className="maq-cta-pill-icon" />
+                    <span>100% Garantía & Repuestos</span>
+                  </div>
+                  <div className="maq-cta-trust-pill">
+                    <Sparkles size={15} className="maq-cta-pill-icon" />
+                    <span>Moldes Personalizados</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Direct WhatsApp Action Card */}
+              <div className="maq-cta-right">
+                <div className="maq-cta-action-card">
+                  <div className="maq-cta-card-header">
+                    <span className="maq-cta-card-badge">
+                      <span className="maq-cta-pulse-dot" /> Ingenieros Disponibles Ahora
+                    </span>
+                    <span className="maq-cta-card-time">Respuesta en &lt; 5 min</span>
+                  </div>
+
+                  <a
+                    href={`https://wa.me/${BRAND.whatsapp}?text=SW- Hola, deseo agendar una asesoría técnica especializada sobre maquinaria bloquera para mi proyecto.`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn btn-primary maq-cta-main-btn"
+                  >
+                    <MessageCircle size={20} /> Agendar Asesoría por WhatsApp <ArrowRight size={18} />
+                  </a>
+
+                  <Link to="/contacto" className="maq-cta-sub-link">
+                    O prefiere enviar un mensaje por formulario web <ArrowRight size={14} />
+                  </Link>
+
+                  <div className="maq-cta-card-footer">
+                    <ShieldCheck size={14} /> Asesoría 100% Gratuita sin compromiso comercial
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
