@@ -9,19 +9,15 @@ export default function CatalogModal() {
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
-    // Open modal automatically after 5 seconds if not dismissed in session
-    const hasSeen = sessionStorage.getItem('maqte_catalog_modal_seen');
-    if (!hasSeen) {
-      const timer = setTimeout(() => {
-        setIsOpen(true);
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
+    // Open modal automatically after 5 seconds on every visit
+    const timer = setTimeout(() => {
+      setIsOpen(true);
+    }, 5000);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleClose = () => {
     setIsOpen(false);
-    sessionStorage.setItem('maqte_catalog_modal_seen', 'true');
   };
 
   const handleOpen = () => {

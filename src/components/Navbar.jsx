@@ -89,16 +89,7 @@ export default function Navbar() {
         <div className="container navbar-inner">
           {/* Logo */}
           <Link to="/" className="navbar-logo">
-            <div className="navbar-logo-icon">
-              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                <rect width="32" height="32" rx="8" fill="#F7BC21"/>
-                <path d="M8 24V8l8 10 8-10v16" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-            <div className="navbar-logo-text">
-              <span className="navbar-logo-main">MAQTE</span>
-              <span className="navbar-logo-sub">COLOMBIA</span>
-            </div>
+            <img src="/images/logo.png" alt="Maqte Colombia Logo" className="navbar-logo-img" />
           </Link>
 
           {/* Desktop Nav */}

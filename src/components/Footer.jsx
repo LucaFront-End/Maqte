@@ -62,14 +62,7 @@ export default function Footer() {
           {/* Brand Column */}
           <div className="footer-brand">
             <div className="footer-logo">
-              <svg width="36" height="36" viewBox="0 0 32 32" fill="none">
-                <rect width="32" height="32" rx="8" fill="#F7BC21"/>
-                <path d="M8 24V8l8 10 8-10v16" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              <div>
-                <div className="footer-logo-main">MAQTE</div>
-                <div className="footer-logo-sub">COLOMBIA</div>
-              </div>
+              <img src="/images/logo.png" alt="Maqte Colombia Logo" style={{ height: '48px', width: 'auto', objectFit: 'contain' }} />
             </div>
             <p className="footer-brand-desc">
               {BRAND.description}

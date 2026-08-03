@@ -57,32 +57,16 @@
 .navbar-logo {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
   flex-shrink: 0;
 }
-.navbar-logo-icon {
+.navbar-logo-img {
+  height: 44px;
+  width: auto;
+  object-fit: contain;
   transition: transform 0.3s var(--ease-spring);
 }
-.navbar-logo:hover .navbar-logo-icon {
-  transform: scale(1.1) rotate(-5deg);
-}
-.navbar-logo-text {
-  display: flex;
-  flex-direction: column;
-  line-height: 1;
-}
-.navbar-logo-main {
-  font-family: var(--font-display);
-  font-size: 1.5rem;
-  color: var(--clr-text);
-  letter-spacing: 0.05em;
-}
-.navbar-logo-sub {
-  font-size: 0.55rem;
-  font-weight: 700;
-  letter-spacing: 0.25em;
-  color: var(--clr-orange);
-  text-transform: uppercase;
+.navbar-logo:hover .navbar-logo-img {
+  transform: scale(1.05);
 }
 
 /* Nav */
