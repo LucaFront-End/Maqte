@@ -1,7 +1,7 @@
 /* ─── CATALOG POPUP MODAL STYLING ─── */
 .catalog-float-btn {
   position: fixed;
-  bottom: 85px;
+  bottom: 145px;
   right: 20px;
   z-index: 998;
   background: #0A0A0A;
