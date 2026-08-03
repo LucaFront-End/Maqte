@@ -60,7 +60,8 @@
   flex-shrink: 0;
 }
 .navbar-logo-img {
-  height: 44px;
+  height: 110px;
+  max-height: 110px;
   width: auto;
   object-fit: contain;
   transition: transform 0.3s var(--ease-spring);
@@ -416,4 +417,11 @@
   height: 1px;
   background: var(--clr-border);
   margin: 0.5rem 0;
+}
+
+@media (max-width: 768px) {
+  .navbar-logo-img {
+    height: 70px;
+    max-height: 70px;
+  }
 }
