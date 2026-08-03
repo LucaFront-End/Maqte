@@ -62,7 +62,7 @@ export default function Footer() {
           {/* Brand Column */}
           <div className="footer-brand">
             <div className="footer-logo">
-              <img src="/images/logo.png" alt="Maqte Colombia Logo" style={{ height: '48px', width: 'auto', objectFit: 'contain' }} />
+              <img src="/images/logo.png" alt="Maqte Colombia Logo" className="footer-logo-img" style={{ height: '96px', width: 'auto', objectFit: 'contain' }} />
             </div>
             <p className="footer-brand-desc">
               {BRAND.description}
