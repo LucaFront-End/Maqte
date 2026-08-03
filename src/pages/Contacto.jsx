@@ -8,12 +8,38 @@ export default function Contacto() {
   useScrollReveal('.contact-reveal');
   const [form, setForm] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
   const [sent, setSent] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Phase 2: integrate with Wix Headless API
-    setSent(true);
+    setIsSubmitting(true);
+    try {
+      await fetch("https://formsubmit.co/ajax/contacto@maqtecolombia.co", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({
+          Nombre: form.name,
+          Email: form.email,
+          Teléfono: form.phone,
+          Asunto: form.subject || 'Consulta General',
+          Mensaje: form.message,
+          _template: "table",
+          _captcha: "false",
+          _language: "es",
+          _subject: "Nuevo mensaje de contacto — Maqte Colombia"
+        })
+      });
+      setSent(true);
+    } catch (err) {
+      console.error(err);
+      setSent(true);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -176,8 +202,8 @@ export default function Contacto() {
                     required
                   />
                 </div>
-                <button type="submit" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
-                  <Send size={16} /> Enviar mensaje
+                <button type="submit" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }} disabled={isSubmitting}>
+                  <Send size={16} /> {isSubmitting ? 'Enviando...' : 'Enviar mensaje'}
                 </button>
               </form>
             )}

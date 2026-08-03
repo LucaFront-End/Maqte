@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, ExternalLink } from 'lucide-react';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import { BRANDS, CATEGORIES } from '../data/content';
+import { CategoryIcon } from '../components/IconMap';
 import './Marcas.css';
 
 export default function Marcas() {
@@ -9,7 +10,10 @@ export default function Marcas() {
 
   const grouped = CATEGORIES.map(cat => ({
     ...cat,
-    brands: BRANDS.filter(b => b.category === cat.label),
+    brands: BRANDS.filter(b => 
+      cat.label.toLowerCase().includes(b.category.toLowerCase()) || 
+      b.category.toLowerCase().includes(cat.id.toLowerCase())
+    ),
   })).filter(cat => cat.brands.length > 0);
 
   return (
@@ -45,7 +49,7 @@ export default function Marcas() {
                 </div>
                 <div className="marca-card-body">
                   <div className="marca-card-cat">{brand.category}</div>
-                  <Link to={`/tienda?marca=${brand.name.toLowerCase()}`} className="marca-card-link">
+                  <Link to={`/tienda?q=${encodeURIComponent(brand.name)}`} className="marca-card-link">
                     Ver productos <ExternalLink size={12} />
                   </Link>
                 </div>
@@ -59,18 +63,22 @@ export default function Marcas() {
       <section className="section-pad" style={{ background: 'var(--clr-bg-2)', borderTop: '1px solid var(--clr-border)' }}>
         <div className="container">
           <h2 className="heading-xl reveal marc-reveal" style={{ marginBottom: '3rem' }}>
-            Por <span style={{ color: 'var(--clr-orange)' }}>categoría</span>
+            Marcas por <span style={{ color: 'var(--clr-orange)' }}>Categoría</span>
           </h2>
           <div className="marcas-cat-groups">
             {grouped.map((group, i) => (
               <div key={group.id} className={`marcas-group reveal marc-reveal reveal-delay-${(i % 3) + 1}`}>
                 <div className="marcas-group-header" style={{ '--cat-accent': group.accent }}>
-                  <span className="marcas-group-icon">{group.icon}</span>
+                  <span className="marcas-group-icon">
+                    <CategoryIcon name={group.icon} size={20} />
+                  </span>
                   <h3 className="marcas-group-name">{group.label}</h3>
                 </div>
                 <div className="marcas-group-chips">
                   {group.brands.map((b, j) => (
-                    <span key={j} className="marcas-chip">{b.name}</span>
+                    <Link key={j} to={`/tienda?q=${encodeURIComponent(b.name)}`} className="marcas-chip">
+                      {b.name}
+                    </Link>
                   ))}
                 </div>
               </div>

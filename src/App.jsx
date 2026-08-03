@@ -13,6 +13,7 @@ import Maquinas from './pages/Maquinas';
 import Producto from './pages/Producto';
 import Carrito from './pages/Carrito';
 import Gracias from './pages/Gracias';
+import CatalogModal from './components/CatalogModal';
 
 // Floating WhatsApp Button
 import { MessageCircle } from 'lucide-react';
@@ -61,6 +62,7 @@ function AppLayout() {
       </Routes>
       <Footer />
       <WhatsAppFloat />
+      <CatalogModal />
     </>
   );
 }
