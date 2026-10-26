@@ -163,10 +163,40 @@ export function WixCartProvider({ children }) {
       const checkoutId = checkoutResult?.checkoutId;
       if (!checkoutId) throw new Error("No se recibió checkoutId");
 
-      // Redirect directly to Wix hosted checkout (same pattern as Restomueble)
-      const thankYouUrl = encodeURIComponent(window.location.origin + "/gracias");
-      const checkoutBase = import.meta.env.VITE_WIX_CHECKOUT_BASE;
-      window.location.href = `${checkoutBase}/__ecom/checkout?checkoutId=${checkoutId}&origin=${thankYouUrl}`;
+      // Redirect to Wix hosted checkout
+      const origin = window.location.origin;
+      const thankYouUrl = `${origin}/gracias`;
+
+      // 1. Prioritize official Wix createRedirectSession (sets up session cookie and resolves custom checkout domain)
+      try {
+        if (wixClient?.redirects?.createRedirectSession) {
+          const { redirectSession } = await wixClient.redirects.createRedirectSession({
+            ecomCheckout: { checkoutId },
+            callbacks: {
+              postFlowUrl: thankYouUrl,
+              thankYouPageUrl: thankYouUrl,
+            },
+          });
+
+          if (redirectSession?.fullUrl) {
+            window.location.href = redirectSession.fullUrl;
+            return;
+          }
+        }
+      } catch (redirectErr) {
+        console.warn(
+          "[Checkout] createRedirectSession fallback to direct checkout URL:",
+          redirectErr?.message || redirectErr
+        );
+      }
+
+      // 2. Direct hosted checkout URL fallback
+      const rawBase =
+        import.meta.env.VITE_WIX_CHECKOUT_BASE || "https://checkout.maqtecolombia.co";
+      const checkoutBase = rawBase.replace(/\/+$/, "");
+      window.location.href = `${checkoutBase}/__ecom/checkout?checkoutId=${checkoutId}&origin=${encodeURIComponent(
+        thankYouUrl
+      )}`;
     } catch (error) {
       console.error("[Checkout] Error:", error?.message || error);
       alert("Error al procesar el pago. Intenta de nuevo.");

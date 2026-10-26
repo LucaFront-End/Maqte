@@ -52,7 +52,6 @@ export default function Carrito() {
       await checkout();
     } catch (err) {
       console.error('Error during checkout:', err);
-      alert('Error al procesar el pago. Intenta de nuevo.');
       setIsCheckingOut(false);
     }
   };
