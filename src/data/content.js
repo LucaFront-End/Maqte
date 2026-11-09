@@ -160,6 +160,249 @@ export const NAV_LINKS = [
   { label: "Contacto", path: "/contacto" },
 ];
 
+export const MACHINE_CATALOG_2026 = [
+  {
+    id: "bloquera-manual-compacta",
+    code: "01",
+    line: "Línea Artesanal",
+    lineId: "artesanal",
+    name: "Bloquera manual compacta",
+    price: "$1.300.000 COP",
+    priceShort: "$1.300.000",
+    previousPrice: "$1.500.000 COP",
+    equippedPrice: null,
+    equippedDesc: null,
+    image: "/images/maquinas/01-bloquera-manual-compacta.png",
+    orientation: "portrait",
+    description: "Equipo de accionamiento manual para fabricación de bloques de concreto.",
+    specs: [
+      { label: "Operación", value: "Manual" },
+      { label: "Aplicación", value: "Producción artesanal" },
+      { label: "Referencia comercial", value: "Precio anterior: $1.500.000" }
+    ],
+    note: "Confirmar molde y accesorios incluidos al cotizar.",
+    whatsappMsg: "SW- Hola, quisiera cotizar la Ficha 01: Bloquera manual compacta ($1.300.000 COP) de la Línea Artesanal."
+  },
+  {
+    id: "bloquera-manual-motovibrador",
+    code: "02",
+    line: "Línea Artesanal",
+    lineId: "artesanal",
+    name: "Bloquera manual compacta con motovibrador",
+    price: "$2.100.000 COP",
+    priceShort: "$2.100.000",
+    previousPrice: "$2.300.000 COP",
+    equippedPrice: null,
+    equippedDesc: null,
+    image: "/images/maquinas/02-bloquera-manual-motovibrador.png",
+    orientation: "portrait",
+    description: "Equipo compacto que incorpora vibración durante el moldeo.",
+    specs: [
+      { label: "Operación", value: "Manual con motovibración" },
+      { label: "Aplicación", value: "Bloques de concreto" },
+      { label: "Referencia comercial", value: "Precio anterior: $2.300.000" }
+    ],
+    note: "Las condiciones eléctricas y el molde se precisan en la cotización.",
+    whatsappMsg: "SW- Hola, quisiera cotizar la Ficha 02: Bloquera manual compacta con motovibrador ($2.100.000 COP) de la Línea Artesanal."
+  },
+  {
+    id: "bloquera-ponedora-pequena",
+    code: "03",
+    line: "Línea Artesanal",
+    lineId: "artesanal",
+    name: "Bloquera ponedora pequeña",
+    price: "$8.300.000 COP",
+    priceShort: "$8.300.000",
+    previousPrice: null,
+    equippedPrice: null,
+    equippedDesc: null,
+    image: "/images/maquinas/03-bloquera-ponedora-pequena.png",
+    orientation: "portrait",
+    description: "Equipo móvil que deposita bloques directamente sobre una superficie nivelada.",
+    specs: [
+      { label: "Producción por ciclo", value: "4 bloques H10 con molde estándar" },
+      { label: "Alimentación", value: "110 V · 60 Hz, según ficha" },
+      { label: "Motovibrador", value: "280 W nominales, según ficha" },
+      { label: "Molde", value: "Intercambiable" },
+      { label: "Operación", value: "Desplazamiento manual" }
+    ],
+    note: "La producción diaria depende de la mezcla, el personal y el tiempo de ciclo.",
+    whatsappMsg: "SW- Hola, quisiera cotizar la Ficha 03: Bloquera ponedora pequeña ($8.300.000 COP) de la Línea Artesanal."
+  },
+  {
+    id: "bloquera-fija-manual",
+    code: "04",
+    line: "Línea Semiindustrial",
+    lineId: "semiindustrial",
+    name: "Bloquera fija manual con moldes intercambiables",
+    price: "Consultar precio / Por cotizar",
+    priceShort: "Consultar precio / Por cotizar",
+    previousPrice: null,
+    equippedPrice: null,
+    equippedDesc: null,
+    image: "/images/maquinas/04-bloquera-fija-manual.png",
+    orientation: "portrait",
+    description: "Equipo estacionario con mesa de vibrocompactación y recepción de bloques sobre tablas.",
+    specs: [
+      { label: "Sistema", value: "Vibrocompactación y accionamiento manual" },
+      { label: "Motovibrador", value: "280 W, según configuración informada" },
+      { label: "Estructura", value: "Base en lámina de 10 mm" },
+      { label: "Moldes", value: "Componentes en láminas de 6 y 12 mm, según ficha" },
+      { label: "Guías", value: "Barras de 1½ pulgadas con bujes de nylon" },
+      { label: "Ampliaciones", value: "Tolva, banda transportadora y mezcladora opcionales" }
+    ],
+    note: "Permite integrar tolva, banda transportadora y mezcladora como ampliaciones opcionales.",
+    whatsappMsg: "SW- Hola, quisiera cotizar la Ficha 04: Bloquera fija manual con moldes intercambiables de la Línea Semiindustrial."
+  },
+  {
+    id: "bloquera-ponedora-grande",
+    code: "05",
+    line: "Línea Semiindustrial",
+    lineId: "semiindustrial",
+    name: "Bloquera ponedora grande",
+    price: "$22.000.000 COP",
+    priceShort: "$22.000.000",
+    previousPrice: null,
+    equippedPrice: null,
+    equippedDesc: null,
+    image: "/images/maquinas/05-bloquera-ponedora-grande.png",
+    orientation: "landscape",
+    description: "Equipo móvil de vibrocompactación para fabricar bloques directamente sobre el área de trabajo.",
+    specs: [
+      { label: "Motovibradores", value: "2 regulables de 280 W cada uno" },
+      { label: "Alimentación", value: "110 V · 60 Hz" },
+      { label: "Molde", value: "Intercambiable" },
+      { label: "Aplicación", value: "Producción semindustrial" }
+    ],
+    note: "Capacidad por tirada y rendimiento sujetos al molde instalado y a las condiciones de operación.",
+    whatsappMsg: "SW- Hola, quisiera cotizar la Ficha 05: Bloquera ponedora grande ($22.000.000 COP) de la Línea Semiindustrial."
+  },
+  {
+    id: "bloquera-fija-hidraulica-pequena",
+    code: "06",
+    line: "Línea Hidráulica Compacta",
+    lineId: "hidraulica-compacta",
+    name: "Bloquera fija hidráulica pequeña",
+    price: "$28.000.000 COP",
+    priceShort: "$28.000.000",
+    previousPrice: null,
+    equippedPrice: "$65.800.000 COP",
+    equippedDesc: "Máquina + mezcladora + banda transportadora",
+    image: "/images/maquinas/06-bloquera-fija-hidraulica-pequena.png",
+    orientation: "portrait",
+    description: "Máquina estacionaria de fabricación de bloques con accionamiento hidráulico.",
+    specs: [
+      { label: "Sistema", value: "Accionamiento hidráulico" },
+      { label: "Configuración base", value: "Máquina individual" },
+      { label: "Línea equipada", value: "Máquina + mezcladora + banda transportadora" },
+      { label: "Precio línea equipada", value: "$65.800.000 COP" }
+    ],
+    note: "Disponible en configuración individual o como paquete de línea equipada cotizado como conjunto.",
+    whatsappMsg: "SW- Hola, quisiera cotizar la Ficha 06: Bloquera fija hidráulica pequeña ($28.000.000 COP base / $65.800.000 COP línea equipada)."
+  },
+  {
+    id: "bloquera-hidraulica-industrial-manual",
+    code: "07",
+    line: "Línea Hidráulica Industrial",
+    lineId: "hidraulica-industrial",
+    name: "Bloquera hidráulica industrial manual",
+    price: "$88.000.000 COP",
+    priceShort: "$88.000.000",
+    previousPrice: null,
+    equippedPrice: "$130.000.000 COP",
+    equippedDesc: "Incluye mezcladora y banda",
+    image: "/images/maquinas/07-bloquera-hidraulica-industrial-manual.png",
+    orientation: "landscape",
+    description: "Sistema industrial de prensado, vibrocompactación y desmoldeo mediante mandos hidráulicos manuales.",
+    specs: [
+      { label: "Control", value: "Válvulas de palanca y mandos convencionales; sin PLC" },
+      { label: "Sistema", value: "Central hidráulica, mesa vibratoria y alimentación" },
+      { label: "Moldeo referencial", value: "8 H10 / 6 H15 / 4 H20 por ciclo" },
+      { label: "Producción referencial", value: "Hasta 4.000–5.000 bloques por jornada, según condiciones" },
+      { label: "Línea equipada", value: "$130.000.000 · incluye mezcladora y banda" }
+    ],
+    note: "Capacidades sujetas a molde, dosificación, jornada y ficha de la configuración contratada.",
+    whatsappMsg: "SW- Hola, quisiera cotizar la Ficha 07: Bloquera hidráulica industrial manual ($88.000.000 COP base / $130.000.000 COP línea equipada)."
+  },
+  {
+    id: "bloquera-hidraulica-automatica-plc",
+    code: "08",
+    line: "Línea Hidráulica Industrial",
+    lineId: "hidraulica-industrial",
+    name: "Bloquera hidráulica automática PLC",
+    price: "$130.000.000 COP",
+    priceShort: "$130.000.000",
+    previousPrice: null,
+    equippedPrice: "$190.000.000 COP",
+    equippedDesc: "Incluye mezcladora y banda",
+    image: "/images/maquinas/08-bloquera-hidraulica-automatica-plc.png",
+    orientation: "landscape",
+    description: "Equipo industrial con secuencia automatizada de alimentación, vibración, prensado y desmoldeo.",
+    specs: [
+      { label: "Automatización", value: "PLC Kinco K623S y HMI táctil de 7”, según ficha" },
+      { label: "Moldeo referencial", value: "8 H10 / 6 H15 / 4 H20 por ciclo" },
+      { label: "Producción referencial", value: "6.000–7.000 bloques por jornada, según condiciones" },
+      { label: "Alimentación", value: "220 V trifásica · 60 Hz, según diseño" },
+      { label: "Central hidráulica", value: "7,5 HP, según ficha de diseño" },
+      { label: "Línea equipada", value: "$190.000.000 · incluye mezcladora y banda" }
+    ],
+    note: "La propuesta equipada contempla acompañamiento, instalación, análisis de mercado y puesta en marcha; alcance a confirmar por escrito.",
+    whatsappMsg: "SW- Hola, quisiera cotizar la Ficha 08: Bloquera hidráulica automática PLC ($130.000.000 COP base / $190.000.000 COP línea equipada)."
+  },
+  {
+    id: "banda-transportadora-industrial",
+    code: "09",
+    line: "Equipos Complementarios",
+    lineId: "complementarios",
+    name: "Banda transportadora industrial",
+    price: "$18.000.000 COP",
+    priceShort: "$18.000.000",
+    previousPrice: null,
+    equippedPrice: null,
+    equippedDesc: null,
+    image: "/images/maquinas/09-banda-transportadora-industrial.png",
+    orientation: "landscape",
+    description: "Sistema de transporte de materiales para alimentar una línea de fabricación de bloques.",
+    specs: [
+      { label: "Longitud de referencia", value: "6 metros" },
+      { label: "Ancho de bastidor", value: "Aproximadamente 600 mm" },
+      { label: "Altura de descarga", value: "3 m de referencia" },
+      { label: "Accionamiento", value: "Motor de diseño de 5 HP" },
+      { label: "Elementos", value: "Bastidor, rodillos y tensores ajustables" }
+    ],
+    note: "Dimensiones, inclinación, motorización y capacidad final según proyecto.",
+    whatsappMsg: "SW- Hola, quisiera cotizar la Ficha 09: Banda transportadora industrial ($18.000.000 COP)."
+  },
+  {
+    id: "mezcladora-horizontal-dos-bultos",
+    code: "10",
+    line: "Equipos Complementarios",
+    lineId: "complementarios",
+    name: "Mezcladora horizontal de dos bultos",
+    price: "Consultar precio / Por cotizar",
+    priceShort: "Consultar precio / Por cotizar",
+    previousPrice: null,
+    equippedPrice: null,
+    equippedDesc: null,
+    image: "/images/maquinas/10-mezcladora-horizontal-dos-bultos.png",
+    orientation: "landscape",
+    description: "Mezcladora de eje horizontal para concreto semiseco y prefabricados.",
+    specs: [
+      { label: "Capacidad nominal", value: "2 bultos de cemento de 50 kg más agregados y agua" },
+      { label: "Volumen útil recomendado", value: "0,45–0,55 m³" },
+      { label: "Motor recomendado", value: "10 HP trifásico" },
+      { label: "Reducción", value: "60:1 · salida aproximada 28–30 rpm" },
+      { label: "Descarga", value: "Compuerta inferior manual" },
+      { label: "Cuba", value: "Longitud útil 1.200 mm · ancho interior 800 mm" }
+    ],
+    note: "Especificaciones de diseño sujetas a validación según configuración del proyecto.",
+    whatsappMsg: "SW- Hola, quisiera cotizar la Ficha 10: Mezcladora horizontal de dos bultos."
+  }
+];
+
+export const CATALOG_CONDITIONS =
+  "Los valores corresponden a referencias comerciales en COP y pueden cambiar. Antes de contratar, confirmar IVA, transporte, instalación, plazo de entrega, garantía, moldes incluidos y condiciones de pago. Las capacidades de producción son referenciales y dependen del molde, mezcla, personal y jornada.";
+
 export const MACHINE_LINES = [
   {
     id: "artesanal",

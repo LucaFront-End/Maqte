@@ -1,145 +1,173 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  CheckCircle2, ArrowRight, Zap, Users, Maximize2, Gauge,
-  RotateCw, ArrowRightLeft, Layers, Grid, Sparkles, Cpu,
-  HelpCircle, MessageCircle, ChevronDown, Building2, ShieldCheck, Wrench,
-  SlidersHorizontal, Check, Award
+  CheckCircle2, ArrowRight, Zap, Gauge,
+  Sparkles, Cpu, MessageCircle, ChevronDown,
+  ShieldCheck, Wrench, Check, Award, Phone,
+  FileText, Layers, Info, Tag
 } from 'lucide-react';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import {
   BRAND,
-  MACHINE_LINES,
-  COMPLEMENTARY_EQUIPMENT,
+  MACHINE_CATALOG_2026,
+  CATALOG_CONDITIONS,
   INNOVATION_ITEMS
 } from '../data/content';
 import './Maquinas.css';
 
-// Helper icon mapping for complementary equipment
-const COMPLEMENTARY_ICONS = {
-  RotateCw,
-  ArrowRightLeft,
-  Layers,
-  Grid
-};
+const LINE_FILTERS = [
+  { id: 'all', label: 'Todas las Fichas', count: 10 },
+  { id: 'artesanal', label: 'Línea Artesanal', count: 3 },
+  { id: 'semiindustrial', label: 'Línea Semiindustrial', count: 2 },
+  { id: 'hidraulica-compacta', label: 'Hidráulica Compacta', count: 1 },
+  { id: 'hidraulica-industrial', label: 'Hidráulica Industrial', count: 2 },
+  { id: 'complementarios', label: 'Equipos Complementarios', count: 2 },
+];
 
 export default function Maquinas() {
   useScrollReveal('.maq-reveal');
 
-  // Calculator State (3 Questions)
-  const [productionTarget, setProductionTarget] = useState('semindustrial'); // Default option
-  const [budgetLevel, setBudgetLevel] = useState('moderado');
-  const [operatorCount, setOperatorCount] = useState('2-4');
+  // Filter state for the 10 catalog fichas
+  const [selectedLineFilter, setSelectedLineFilter] = useState('all');
+  const [activeFichaCode, setActiveFichaCode] = useState(null);
 
-  // Filter or Active machine detail highlight state
-  const [activeLineId, setActiveLineId] = useState(null);
+  // Calculator State (3 Questions mapped to the 2026 Catalog)
+  const [scaleTarget, setScaleTarget] = useState('artesanal-ponedora');
+  const [budgetRange, setBudgetRange] = useState('8m-22m');
+  const [operationMode, setOperationMode] = useState('ponedora-movil');
 
-  // Match recommendation logic
-  const recommendedLine = useMemo(() => {
-    let scores = {
-      artesanal: 0,
-      semindustrial: 0,
-      industrial: 0,
-      'industrial-alta': 0,
-      automatica: 0
+  const filteredCatalog = useMemo(() => {
+    if (selectedLineFilter === 'all') return MACHINE_CATALOG_2026;
+    return MACHINE_CATALOG_2026.filter(item => item.lineId === selectedLineFilter);
+  }, [selectedLineFilter]);
+
+  // Match recommendation logic for the 8 block machines (01 to 08)
+  const recommendedMachine = useMemo(() => {
+    const scores = {
+      '01': 0,
+      '02': 0,
+      '03': 0,
+      '04': 0,
+      '05': 0,
+      '06': 0,
+      '07': 0,
+      '08': 0,
     };
 
-    if (productionTarget === 'artesanal') {
-      scores.artesanal += 50;
-      scores.semindustrial += 20;
-    } else if (productionTarget === 'semindustrial') {
-      scores.semindustrial += 50;
-      scores.artesanal += 15;
-      scores.industrial += 15;
-    } else if (productionTarget === 'industrial') {
-      scores.industrial += 50;
-      scores.semindustrial += 15;
-      scores['industrial-alta'] += 20;
-    } else if (productionTarget === 'industrial-alta') {
-      scores['industrial-alta'] += 50;
-      scores.industrial += 20;
-      scores.automatica += 20;
-    } else if (productionTarget === 'automatica') {
-      scores.automatica += 50;
-      scores['industrial-alta'] += 20;
+    // Question 1: Scale target
+    if (scaleTarget === 'artesanal-manual') {
+      scores['01'] += 45;
+      scores['02'] += 50;
+      scores['03'] += 15;
+    } else if (scaleTarget === 'artesanal-ponedora') {
+      scores['03'] += 50;
+      scores['02'] += 20;
+      scores['04'] += 20;
+    } else if (scaleTarget === 'semiindustrial') {
+      scores['04'] += 45;
+      scores['05'] += 50;
+      scores['06'] += 20;
+    } else if (scaleTarget === 'hidraulica-compacta') {
+      scores['06'] += 55;
+      scores['05'] += 20;
+      scores['07'] += 20;
+    } else if (scaleTarget === 'hidraulica-industrial') {
+      scores['07'] += 50;
+      scores['08'] += 55;
+      scores['06'] += 15;
     }
 
-    if (budgetLevel === 'bajo') {
-      scores.artesanal += 35;
-      scores.semindustrial += 15;
-    } else if (budgetLevel === 'moderado') {
-      scores.semindustrial += 35;
-      scores.artesanal += 15;
-      scores.industrial += 10;
-    } else if (budgetLevel === 'medio-alto') {
-      scores.industrial += 35;
-      scores.semindustrial += 10;
-      scores['industrial-alta'] += 15;
-    } else if (budgetLevel === 'alto') {
-      scores['industrial-alta'] += 35;
-      scores.automatica += 20;
-    } else if (budgetLevel === 'premium') {
-      scores.automatica += 35;
-      scores['industrial-alta'] += 15;
+    // Question 2: Budget range
+    if (budgetRange === '1m-3m') {
+      scores['01'] += 45;
+      scores['02'] += 45;
+    } else if (budgetRange === '8m-22m') {
+      scores['03'] += 40;
+      scores['04'] += 40;
+      scores['05'] += 45;
+    } else if (budgetRange === '28m-66m') {
+      scores['06'] += 50;
+      scores['05'] += 15;
+    } else if (budgetRange === '88m-130m') {
+      scores['07'] += 50;
+      scores['08'] += 35;
+    } else if (budgetRange === '130m-190m') {
+      scores['08'] += 55;
+      scores['07'] += 25;
     }
 
-    if (operatorCount === '1-2') {
-      scores.artesanal += 25;
-      scores.semindustrial += 10;
-    } else if (operatorCount === '2-4') {
-      scores.semindustrial += 25;
-      scores.automatica += 20;
-    } else if (operatorCount === '4-6') {
-      scores.industrial += 25;
-      scores['industrial-alta'] += 20;
-    } else if (operatorCount === '5+') {
-      scores['industrial-alta'] += 25;
-      scores.industrial += 15;
-      scores.automatica += 15;
+    // Question 3: Operation mode
+    if (operationMode === 'manual-compacta') {
+      scores['01'] += 35;
+      scores['04'] += 20;
+    } else if (operationMode === 'manual-vibracion') {
+      scores['02'] += 38;
+      scores['04'] += 35;
+    } else if (operationMode === 'ponedora-movil') {
+      scores['03'] += 38;
+      scores['05'] += 38;
+    } else if (operationMode === 'hidraulica-manual') {
+      scores['06'] += 35;
+      scores['07'] += 38;
+    } else if (operationMode === 'plc-automatica') {
+      scores['08'] += 50;
     }
 
-    let bestId = 'semindustrial';
+    let bestCode = '03';
     let maxScore = -1;
-    Object.keys(scores).forEach(id => {
-      if (scores[id] > maxScore) {
-        maxScore = scores[id];
-        bestId = id;
+    Object.keys(scores).forEach(code => {
+      if (scores[code] > maxScore) {
+        maxScore = scores[code];
+        bestCode = code;
       }
     });
 
-    return MACHINE_LINES.find(line => line.id === bestId) || MACHINE_LINES[1];
-  }, [productionTarget, budgetLevel, operatorCount]);
+    return MACHINE_CATALOG_2026.find(m => m.code === bestCode) || MACHINE_CATALOG_2026[2];
+  }, [scaleTarget, budgetRange, operationMode]);
 
   const dynamicWhatsappUrl = useMemo(() => {
-    const prodLabel =
-      productionTarget === 'artesanal' ? '200 - 300 bloques/día' :
-      productionTarget === 'semindustrial' ? '600 - 700 bloques/día' :
-      productionTarget === 'industrial' ? '3.000 - 5.000 bloques/día' :
-      productionTarget === 'industrial-alta' ? '7.000 - 8.000 bloques/día' :
-      '8.000 - 10.000+ bloques/día (Automática)';
-
-    const text = `SW- Hola, utilicé la herramienta '¿Qué máquina necesito?' en la página de Maqte Colombia.\n\n` +
-      `📋 Mis requerimientos:\n` +
-      `• Producción deseada: ${prodLabel}\n` +
-      `• Nivel de presupuesto: ${budgetLevel.toUpperCase()}\n` +
-      `• Personal disponible: ${operatorCount} operarios\n\n` +
-      `🎯 Máquina recomendada: ${recommendedLine.name}\n` +
-      `Me gustaría recibir una cotización detallada y asesoría comercial.`;
-
+    const text =
+      `SW- Hola, utilicé el Asesor de Selección en la página de Maqte Colombia.\n\n` +
+      `🎯 Equipo recomendado: Ficha ${recommendedMachine.code} — ${recommendedMachine.name} (${recommendedMachine.line})\n` +
+      `💰 Referencia comercial: ${recommendedMachine.price}${recommendedMachine.equippedPrice ? ` (Línea equipada: ${recommendedMachine.equippedPrice})` : ''}\n\n` +
+      `Me gustaría recibir asesoría técnica y cotización formal.`;
     return `https://wa.me/${BRAND.whatsapp}?text=${encodeURIComponent(text)}`;
-  }, [productionTarget, budgetLevel, operatorCount, recommendedLine]);
+  }, [recommendedMachine]);
 
-  const scrollToMachine = (id) => {
-    setActiveLineId(id);
-    const element = document.getElementById(`linea-${id}`);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
+  const scrollToFicha = (code) => {
+    setSelectedLineFilter('all');
+    setActiveFichaCode(code);
+    setTimeout(() => {
+      const listEl = document.querySelector('.fichas-list');
+      const cardEl = document.getElementById(`ficha-${code}`);
+      if (listEl && cardEl) {
+        const cards = Array.from(listEl.querySelectorAll('.ficha-card'));
+        const targetIdx = cards.indexOf(cardEl);
+        if (targetIdx !== -1) {
+          const listTop = listEl.getBoundingClientRect().top + window.scrollY;
+          const styles = window.getComputedStyle(listEl);
+          const gap = parseFloat(styles.rowGap || styles.gap) || 64;
+          let offsetBefore = 0;
+          for (let i = 0; i < targetIdx; i++) {
+            offsetBefore += cards[i].offsetHeight + gap;
+          }
+          const stickyTop = 84 + targetIdx * 16;
+          window.scrollTo({
+            top: Math.max(0, listTop + offsetBefore - stickyTop),
+            behavior: 'smooth'
+          });
+          return;
+        }
+      }
+      if (cardEl) {
+        cardEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 60);
   };
 
   return (
     <main className="maquinas-page">
-      {/* ─── HERO SECTION (ULTRA PREMIUM 2-COLUMN) ─── */}
+      {/* ─── HERO SECTION (EDICIÓN COMERCIAL 2026) ─── */}
       <section className="page-hero maquinas-hero">
         <div className="page-hero-bg" />
         <div className="container page-hero-content">
@@ -148,50 +176,49 @@ export default function Maquinas() {
             <div className="maquinas-hero-left reveal-left maq-reveal">
               <span className="hero-badge-tag">
                 <Zap size={14} className="hero-badge-icon" />
-                Tecnología & Maquinaria Industrial Bloquera
+                Edición Comercial 2026 · Precios en Pesos Colombianos
               </span>
               <h1 className="display-lg hero-main-title">
-                Fuerza e Ingeniería en <span className="hero-gold-text">Maquinaria Bloquera</span>
+                Catálogo de <span className="hero-gold-text">Maquinaria Bloquera</span>
               </h1>
               <p className="maquinas-hero-sub">
-                Potencia la productividad de tu obra o fábrica con la clasificación oficial Maqte: 
-                desde líneas artesanales para autoconstrucción hasta plantas automáticas HMI/PLC de alta escala en Colombia.
+                Soluciones profesionales para fabricación de bloques y prefabricados: equipos manuales, ponedoras móviles, sistemas hidráulicos, plantas automáticas PLC Kinco y equipos complementarios.
               </p>
 
               {/* Spec Stat Badges Bar */}
               <div className="hero-stats-row">
                 <div className="hero-stat-chip reveal maq-reveal reveal-delay-1">
-                  <Gauge size={16} className="hero-stat-icon" />
+                  <Layers size={16} className="hero-stat-icon" />
                   <div>
-                    <span className="hero-stat-val">200 a 10.000+</span>
-                    <span className="hero-stat-lbl">Bloques por día</span>
+                    <span className="hero-stat-val">10 Fichas Oficiales</span>
+                    <span className="hero-stat-lbl">8 Bloqueras + 2 Complementos</span>
                   </div>
                 </div>
 
                 <div className="hero-stat-chip reveal maq-reveal reveal-delay-2">
-                  <ShieldCheck size={16} className="hero-stat-icon" />
+                  <Tag size={16} className="hero-stat-icon" />
                   <div>
-                    <span className="hero-stat-val">100% Garantía</span>
-                    <span className="hero-stat-lbl">Soporte en Colombia</span>
+                    <span className="hero-stat-val">Desde $1.300.000</span>
+                    <span className="hero-stat-lbl">Precios Base COP</span>
                   </div>
                 </div>
 
                 <div className="hero-stat-chip reveal maq-reveal reveal-delay-3">
                   <Cpu size={16} className="hero-stat-icon" />
                   <div>
-                    <span className="hero-stat-val">PLC & HMI</span>
-                    <span className="hero-stat-lbl">Sistemas Digitales</span>
+                    <span className="hero-stat-val">PLC Kinco & HMI 7”</span>
+                    <span className="hero-stat-lbl">Automatización Industrial</span>
                   </div>
                 </div>
               </div>
 
               {/* Hero Action Buttons */}
               <div className="maquinas-hero-actions reveal maq-reveal reveal-delay-4">
-                <a href="#calculadora" className="btn btn-primary hero-btn-main">
-                  <Sparkles size={18} /> ¿Qué máquina necesito?
+                <a href="#fichas" className="btn btn-primary hero-btn-main">
+                  <FileText size={18} /> Ver las 10 Fichas Técnicas
                 </a>
-                <a href="#lineas" className="btn btn-outline hero-btn-sub">
-                  Explorar Catálogo <ArrowRight size={16} />
+                <a href="#portafolio" className="btn btn-outline hero-btn-sub">
+                  Guía Rápida de Precios <ArrowRight size={16} />
                 </a>
               </div>
             </div>
@@ -200,21 +227,21 @@ export default function Maquinas() {
             <div className="maquinas-hero-right reveal-right maq-reveal reveal-delay-2">
               <div className="hero-showcase-frame">
                 <img
-                  src="/images/maquinas/hero_showcase.png"
-                  alt="Planta de Maquinaria Industrial Bloquera Maqte Colombia"
+                  src="/images/maquinas/08-bloquera-hidraulica-automatica-plc.png"
+                  alt="Bloquera hidráulica automática PLC Maqte Colombia"
                   className="hero-showcase-img"
                 />
                 <div className="hero-img-gradient-overlay" />
                 <div className="hero-top-badge">
-                  <Award size={14} /> Distribuidor Oficial Colombia
+                  <Award size={14} /> Florencia, Caquetá · Colombia
                 </div>
                 <div className="hero-bottom-floating-card">
                   <div className="hero-float-icon">
                     <Wrench size={18} />
                   </div>
                   <div>
-                    <span className="hero-float-title">Líneas Llave en Mano</span>
-                    <span className="hero-float-sub">Instalación, moldes & asesoría técnica</span>
+                    <span className="hero-float-title">Fabricación, Moldes & Puesta en Marcha</span>
+                    <span className="hero-float-sub">Líneas individuales y paquetes equipados con mezcladora y banda</span>
                   </div>
                 </div>
               </div>
@@ -223,18 +250,277 @@ export default function Maquinas() {
         </div>
       </section>
 
-      {/* ─── SECCIÓN INTERACTIVA PREMIUM: ¿QUÉ MÁQUINA NECESITO? ─── */}
+      {/* ─── PORTAFOLIO DE EQUIPOS: GUÍA RÁPIDA DE REFERENCIAS Y PRECIOS ─── */}
+      <section id="portafolio" className="section-pad portfolio-summary-section">
+        <div className="container">
+          <div className="section-header reveal maq-reveal">
+            <span className="label-upper" style={{ color: '#D97706', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <Tag size={14} /> Portafolio de Equipos 2026
+            </span>
+            <h2 className="heading-xl">
+              Guía Rápida de <span style={{ color: '#D97706' }}>Referencias y Precios</span>
+            </h2>
+            <p className="section-subtitle">
+              Resumen oficial de referencias comerciales en pesos colombianos (COP). Haz clic en cualquier equipo para ir directamente a su ficha técnica detallada.
+            </p>
+          </div>
+
+          <div className="portfolio-table-card reveal maq-reveal">
+            <div className="portfolio-table-responsive">
+              <table className="portfolio-summary-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Línea / Categoría</th>
+                    <th>Referencia</th>
+                    <th>Precio Base (COP)</th>
+                    <th>Línea Equipada / Detalle</th>
+                    <th style={{ textAlign: 'right' }}>Ficha</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {MACHINE_CATALOG_2026.map((item) => (
+                    <tr
+                      key={item.code}
+                      className="portfolio-row"
+                      onClick={() => scrollToFicha(item.code)}
+                    >
+                      <td className="portfolio-code-cell">
+                        <span className="portfolio-code-badge">{item.code}</span>
+                      </td>
+                      <td>
+                        <span className={`portfolio-line-pill line-${item.lineId}`}>
+                          {item.line}
+                        </span>
+                      </td>
+                      <td className="portfolio-name-cell">
+                        <strong>{item.name}</strong>
+                      </td>
+                      <td className="portfolio-price-cell">
+                        <span className={`portfolio-price-val ${!item.priceShort.startsWith('$') ? 'consult' : ''}`}>
+                          {item.price}
+                        </span>
+                        {item.previousPrice && (
+                          <span className="portfolio-prev-price">
+                            Antes: {item.previousPrice}
+                          </span>
+                        )}
+                      </td>
+                      <td className="portfolio-extra-cell">
+                        {item.equippedPrice ? (
+                          <span className="portfolio-equipped-tag">
+                            Equipada: <strong>{item.equippedPrice}</strong>
+                          </span>
+                        ) : (
+                          <span className="portfolio-spec-preview">
+                            {item.specs[0]?.label}: {item.specs[0]?.value}
+                          </span>
+                        )}
+                      </td>
+                      <td style={{ textAlign: 'right' }}>
+                        <button
+                          type="button"
+                          className="portfolio-go-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            scrollToFicha(item.code);
+                          }}
+                        >
+                          Ver ficha <ArrowRight size={14} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="portfolio-table-footnote">
+              <Info size={15} />
+              <span>
+                Los precios de líneas equipadas se detallan en cada ficha. Los equipos opcionales no se presumen incluidos.
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── CATÁLOGO COMPLETO: LAS 10 FICHAS TÉCNICAS ─── */}
+      <section id="fichas" className="section-pad fichas-catalog-section">
+        <div className="container">
+          <div className="section-header reveal maq-reveal">
+            <span className="label-upper">Especificaciones y Alcance Comercial</span>
+            <h2 className="heading-xl">
+              Fichas Técnicas del <span style={{ color: '#D97706' }}>Catálogo 2026</span>
+            </h2>
+            <p className="section-subtitle">
+              Cada ficha presenta fotografía real suministrada por MAQTECOLOMBIA, descripción operativa, tabla de características técnicas y alcance comercial.
+            </p>
+          </div>
+
+          {/* Filter Bar by Line */}
+          <div className="fichas-filter-bar reveal maq-reveal">
+            {LINE_FILTERS.map(f => (
+              <button
+                key={f.id}
+                type="button"
+                className={`ficha-filter-btn ${selectedLineFilter === f.id ? 'active' : ''}`}
+                onClick={() => setSelectedLineFilter(f.id)}
+              >
+                <span>{f.label}</span>
+                <span className="ficha-filter-count">{f.count}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Fichas List (Sticky Stacking Cards) */}
+          <div className="fichas-list maquinas-lines-stack">
+            {filteredCatalog.map((item, idx) => {
+              const isHighlighted = activeFichaCode === item.code;
+              const equippedWhatsappMsg = item.equippedPrice
+                ? `SW- Hola, me interesa cotizar la Línea Equipada de la Ficha ${item.code}: ${item.name} (${item.equippedPrice} — ${item.equippedDesc}).`
+                : '';
+
+              return (
+                <article
+                  key={item.code}
+                  id={`ficha-${item.code}`}
+                  className={`ficha-card maq-line-card ${isHighlighted ? 'highlighted' : ''}`}
+                  style={{
+                    '--stack-idx': idx + 1,
+                    top: `calc(84px + ${idx * 16}px)`,
+                    zIndex: idx + 1
+                  }}
+                >
+                  {/* Image Column */}
+                  <div className="ficha-media-col maq-line-img-col">
+                    <div className="ficha-media-top-badges">
+                      <span className="ficha-num-badge">FICHA {item.code}</span>
+                      <span className="ficha-line-badge">{item.line}</span>
+                    </div>
+                    <img
+                      src={item.image}
+                      alt={`${item.code} - ${item.name}`}
+                      className="ficha-main-img maq-line-img"
+                      loading="lazy"
+                    />
+                    <div className="maq-line-img-glow" />
+                  </div>
+
+                  {/* Content Column */}
+                  <div className="ficha-body-col maq-line-content-col">
+                    <div>
+                      {/* Top Header with Sticky Number */}
+                      <div className="maq-line-header ficha-sticky-header">
+                        <span className="maq-line-number">{item.code}</span>
+                        <div>
+                          <span className="ficha-overline">
+                            {item.code} &nbsp;/&nbsp; {item.line.toUpperCase()}
+                          </span>
+                          <h3 className="ficha-title">{item.name}</h3>
+                          <p className="ficha-desc">{item.description}</p>
+                        </div>
+                      </div>
+
+                      {/* Price & Equipped Package Box */}
+                      <div className="ficha-pricing-row">
+                        <div className="ficha-price-main-box">
+                          <span className="ficha-price-label">Precio Base Referencial</span>
+                          <div className="ficha-price-value-wrap">
+                            <span className={`ficha-price-value ${!item.priceShort.startsWith('$') ? 'is-consult' : ''}`}>
+                              {item.price}
+                            </span>
+                            {item.previousPrice && (
+                              <span className="ficha-price-previous">
+                                Precio anterior: <del>{item.previousPrice}</del>
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {item.equippedPrice && (
+                          <div className="ficha-price-equipped-box">
+                            <span className="ficha-equipped-label">
+                              <Sparkles size={13} /> Paquete Línea Equipada
+                            </span>
+                            <span className="ficha-equipped-value">{item.equippedPrice}</span>
+                            <span className="ficha-equipped-desc">{item.equippedDesc}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Technical Specs Table */}
+                      <div className="ficha-specs-block">
+                        <h4 className="ficha-specs-heading">Características Técnicas</h4>
+                        <table className="ficha-specs-table">
+                          <tbody>
+                            {item.specs.map((spec, sIdx) => (
+                              <tr key={sIdx}>
+                                <th>{spec.label}</th>
+                                <td>{spec.value}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+
+                      {/* Scope / Commercial Note */}
+                      {item.note && (
+                        <div className="ficha-scope-note">
+                          <Info size={16} className="ficha-scope-icon" />
+                          <span>{item.note}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Footer Actions */}
+                    <div className="ficha-actions-footer">
+                      <a
+                        href={`https://wa.me/${BRAND.whatsapp}?text=${encodeURIComponent(item.whatsappMsg)}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="btn btn-primary ficha-cta-primary"
+                      >
+                        <MessageCircle size={17} /> Cotizar Ficha {item.code}
+                      </a>
+
+                      {item.equippedPrice && (
+                        <a
+                          href={`https://wa.me/${BRAND.whatsapp}?text=${encodeURIComponent(equippedWhatsappMsg)}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="btn btn-outline ficha-cta-equipped"
+                        >
+                          <Layers size={16} /> Cotizar Línea Equipada ({item.equippedPrice})
+                        </a>
+                      )}
+
+                      <a
+                        href={`tel:${BRAND.phone}`}
+                        className="btn btn-outline ficha-cta-call"
+                      >
+                        <Phone size={15} /> Llamar a Asesor
+                      </a>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── SECCIÓN INTERACTIVA: ¿QUÉ MÁQUINA NECESITO? ─── */}
       <section id="calculadora" className="section-pad calc-section">
         <div className="container">
           <div className="section-header calc-header reveal maq-reveal">
             <span className="label-upper" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#D97706' }}>
-              <Sparkles size={14} /> Asesor Virtual de Selección
+              <Sparkles size={14} /> Asesor Virtual de Selección 2026
             </span>
             <h2 className="heading-xl" style={{ fontSize: '2.5rem', marginTop: '0.5rem' }}>
               ¿Qué máquina <span className="calc-title-highlight">necesito?</span>
             </h2>
             <p className="section-subtitle" style={{ maxWidth: '720px', margin: '0.75rem auto 0' }}>
-              Selecciona tus metas operativas y nuestro algoritmo configurador calculará de inmediato la línea de maquinaria exacta para tu proyecto.
+              Configura tu alcance operativo, presupuesto en COP y sistema preferido para identificar la referencia exacta de nuestro catálogo 2026.
             </p>
           </div>
 
@@ -244,45 +530,43 @@ export default function Maquinas() {
               <div className="calc-form-header">
                 <div>
                   <span className="calc-form-subheading">Configurador paso a paso</span>
-                  <h3 className="calc-form-main-title">Parámetros de Producción</h3>
+                  <h3 className="calc-form-main-title">Parámetros de tu Proyecto</h3>
                 </div>
                 <div className="calc-progress-pill">
-                  <Sparkles size={14} /> 3 / 3 Completados
+                  <Sparkles size={14} /> Catálogo Oficial 2026
                 </div>
               </div>
 
-              {/* Question 1: Production Target */}
+              {/* Question 1: Scale Target */}
               <div className="calc-group">
                 <div className="calc-group-header">
                   <div className="calc-step-num">01</div>
                   <div>
                     <label className="calc-label">
-                      ¿Cuántos bloques desea producir por día?
+                      ¿Qué nivel de producción o línea buscas?
                     </label>
-                    <span className="calc-label-hint">Selecciona tu meta de volumen diario</span>
+                    <span className="calc-label-hint">Selecciona el alcance de fabricación de bloques</span>
                   </div>
                 </div>
                 <div className="calc-options-grid">
                   {[
-                    { id: 'artesanal', label: '200 a 300', tag: 'bloques/día', sub: 'Línea Artesanal' },
-                    { id: 'semindustrial', label: '600 a 700', tag: 'bloques/día', sub: 'Semindustrial' },
-                    { id: 'industrial', label: '3.000 a 5.000', tag: 'bloques/día', sub: 'Industrial' },
-                    { id: 'industrial-alta', label: '7.000 a 8.000', tag: 'bloques/día', sub: 'Alta Producción' },
-                    { id: 'automatica', label: '8.000 a 10.000+', tag: 'bloques/día', sub: 'Automática PLC' }
+                    { id: 'artesanal-manual', label: 'Artesanal Compacta', tag: 'Fichas 01–02', sub: 'Iniciación y obra local' },
+                    { id: 'artesanal-ponedora', label: 'Ponedora Pequeña', tag: '4 bloques H10/ciclo', sub: 'Ficha 03 · Móvil' },
+                    { id: 'semiindustrial', label: 'Semiindustrial', tag: 'Fichas 04–05', sub: 'Fija o Ponedora Grande' },
+                    { id: 'hidraulica-compacta', label: 'Hidráulica Compacta', tag: 'Ficha 06', sub: 'Prensado Hidráulico' },
+                    { id: 'hidraulica-industrial', label: 'Industrial / PLC', tag: '4.000 a 7.000/día', sub: 'Fichas 07–08' }
                   ].map(opt => {
-                    const isSelected = productionTarget === opt.id;
+                    const isSelected = scaleTarget === opt.id;
                     return (
                       <button
                         key={opt.id}
                         type="button"
                         className={`calc-option-card ${isSelected ? 'active' : ''}`}
-                        onClick={() => setProductionTarget(opt.id)}
+                        onClick={() => setScaleTarget(opt.id)}
                       >
                         <div className="calc-opt-top">
                           <span className="calc-opt-val">{opt.label}</span>
-                          {isSelected ? (
-                            <span className="calc-opt-check"><Check size={12} /></span>
-                          ) : null}
+                          {isSelected && <span className="calc-opt-check"><Check size={12} /></span>}
                         </div>
                         <span className="calc-opt-tag">{opt.tag}</span>
                         <span className="calc-opt-sub">{opt.sub}</span>
@@ -292,38 +576,36 @@ export default function Maquinas() {
                 </div>
               </div>
 
-              {/* Question 2: Budget Level */}
+              {/* Question 2: Budget Range in COP */}
               <div className="calc-group">
                 <div className="calc-group-header">
                   <div className="calc-step-num">02</div>
                   <div>
                     <label className="calc-label">
-                      ¿Cuál es su presupuesto de inversión?
+                      ¿Cuál es tu rango de inversión estimado (COP)?
                     </label>
-                    <span className="calc-label-hint">Define el alcance del capital disponible</span>
+                    <span className="calc-label-hint">Valores de referencia comercial en pesos colombianos</span>
                   </div>
                 </div>
                 <div className="calc-options-grid">
                   {[
-                    { id: 'bajo', label: 'Inicial / Económica', tag: 'Entrada', sub: 'Equipos Artesanales' },
-                    { id: 'moderado', label: 'Moderado', tag: 'Equilibrado', sub: 'Semindustrial' },
-                    { id: 'medio-alto', label: 'Medio - Alto', tag: 'Robusto', sub: 'Industrial' },
-                    { id: 'alto', label: 'Alto Industrial', tag: 'Gran Escala', sub: 'Planta Continua' },
-                    { id: 'premium', label: 'Premium PLC', tag: 'Automático', sub: 'HMI Digital' }
+                    { id: '1m-3m', label: '$1.3M a $2.1M', tag: 'Entrada COP', sub: 'Manuales compactas' },
+                    { id: '8m-22m', label: '$8.3M a $22M', tag: 'Intermedio COP', sub: 'Ponedoras y fijas' },
+                    { id: '28m-66m', label: '$28M a $65.8M', tag: 'Hidráulica Compacta', sub: 'Base o línea equipada' },
+                    { id: '88m-130m', label: '$88M a $130M', tag: 'Industrial Base', sub: 'Hidráulica / PLC' },
+                    { id: '130m-190m', label: '$130M a $190M', tag: 'Planta Equipada', sub: 'Con mezcladora y banda' }
                   ].map(opt => {
-                    const isSelected = budgetLevel === opt.id;
+                    const isSelected = budgetRange === opt.id;
                     return (
                       <button
                         key={opt.id}
                         type="button"
                         className={`calc-option-card ${isSelected ? 'active' : ''}`}
-                        onClick={() => setBudgetLevel(opt.id)}
+                        onClick={() => setBudgetRange(opt.id)}
                       >
                         <div className="calc-opt-top">
                           <span className="calc-opt-val">{opt.label}</span>
-                          {isSelected ? (
-                            <span className="calc-opt-check"><Check size={12} /></span>
-                          ) : null}
+                          {isSelected && <span className="calc-opt-check"><Check size={12} /></span>}
                         </div>
                         <span className="calc-opt-tag">{opt.tag}</span>
                         <span className="calc-opt-sub">{opt.sub}</span>
@@ -333,38 +615,38 @@ export default function Maquinas() {
                 </div>
               </div>
 
-              {/* Question 3: Operators Count */}
+              {/* Question 3: Operation Type */}
               <div className="calc-group">
                 <div className="calc-group-header">
                   <div className="calc-step-num">03</div>
                   <div>
                     <label className="calc-label">
-                      ¿Cuántos operarios tiene disponibles?
+                      ¿Qué tipo de operación técnica prefieres?
                     </label>
-                    <span className="calc-label-hint">Capacidad de personal en planta</span>
+                    <span className="calc-label-hint">Sistema de moldeo y control del equipo</span>
                   </div>
                 </div>
-                <div className="calc-options-grid calc-grid-4">
+                <div className="calc-options-grid">
                   {[
-                    { id: '1-2', label: '1 a 2 operarios', sub: 'Equipo Reducido' },
-                    { id: '2-4', label: '2 a 4 operarios', sub: 'Equipo Estándar' },
-                    { id: '4-6', label: '4 a 6 operarios', sub: 'Equipo Amplio' },
-                    { id: '5+', label: '5 o más operarios', sub: 'Planta Completa' }
+                    { id: 'manual-compacta', label: 'Manual Pura', tag: 'Sin motor', sub: 'Accionamiento manual' },
+                    { id: 'manual-vibracion', label: 'Motovibración', tag: '280 W · 110 V', sub: 'Compacta o estacionaria' },
+                    { id: 'ponedora-movil', label: 'Ponedora Móvil', tag: 'Sin tablas', sub: 'Descarga sobre piso' },
+                    { id: 'hidraulica-manual', label: 'Mandos Hidráulicos', tag: 'Palancas', sub: 'Alta presión sin PLC' },
+                    { id: 'plc-automatica', label: 'Automática PLC', tag: 'Kinco + HMI 7”', sub: 'Secuencia automatizada' }
                   ].map(opt => {
-                    const isSelected = operatorCount === opt.id;
+                    const isSelected = operationMode === opt.id;
                     return (
                       <button
                         key={opt.id}
                         type="button"
                         className={`calc-option-card ${isSelected ? 'active' : ''}`}
-                        onClick={() => setOperatorCount(opt.id)}
+                        onClick={() => setOperationMode(opt.id)}
                       >
                         <div className="calc-opt-top">
                           <span className="calc-opt-val">{opt.label}</span>
-                          {isSelected ? (
-                            <span className="calc-opt-check"><Check size={12} /></span>
-                          ) : null}
+                          {isSelected && <span className="calc-opt-check"><Check size={12} /></span>}
                         </div>
+                        <span className="calc-opt-tag">{opt.tag}</span>
                         <span className="calc-opt-sub">{opt.sub}</span>
                       </button>
                     );
@@ -373,72 +655,58 @@ export default function Maquinas() {
               </div>
             </div>
 
-            {/* Recommendation Result Column (Diagnostic Terminal) */}
+            {/* Recommendation Result Column */}
             <div className="calc-result reveal-right maq-reveal reveal-delay-2">
               <div className="calc-result-header">
                 <div className="calc-result-badge">
-                  <Sparkles size={14} /> Recomendación Calculada (100% Match)
+                  <Sparkles size={14} /> Ficha Recomendada ({recommendedMachine.code} / 08)
                 </div>
               </div>
 
               <div className="calc-recommended-card">
                 <div className="calc-rec-header">
-                  <div className="calc-rec-badge-tag">{recommendedLine.badge}</div>
-                  <h3 className="calc-rec-title">{recommendedLine.name}</h3>
-                  <p className="calc-rec-tagline">{recommendedLine.tagline}</p>
+                  <div className="calc-rec-badge-tag">
+                    FICHA {recommendedMachine.code} · {recommendedMachine.line}
+                  </div>
+                  <h3 className="calc-rec-title">{recommendedMachine.name}</h3>
+                  <p className="calc-rec-tagline">{recommendedMachine.description}</p>
                 </div>
 
                 <div className="calc-rec-img-wrapper">
                   <img
-                    src={recommendedLine.image}
-                    alt={recommendedLine.name}
+                    src={recommendedMachine.image}
+                    alt={recommendedMachine.name}
                     className="calc-rec-img"
                   />
                   <div className="calc-rec-img-overlay" />
                   <div className="calc-rec-img-badge">
-                    <Award size={14} /> Elección Óptima
+                    <Award size={14} /> {recommendedMachine.price}
                   </div>
                 </div>
 
                 <div className="calc-specs-box">
-                  <div className="calc-spec-item">
-                    <div className="calc-spec-icon-box">
-                      <Gauge size={16} />
+                  {recommendedMachine.specs.slice(0, 3).map((s, idx) => (
+                    <div key={idx} className="calc-spec-item">
+                      <div className="calc-spec-icon-box">
+                        <Gauge size={16} />
+                      </div>
+                      <div>
+                        <span className="calc-spec-lbl">{s.label}</span>
+                        <span className="calc-spec-val">{s.value}</span>
+                      </div>
                     </div>
-                    <div>
-                      <span className="calc-spec-lbl">Capacidad Diaria</span>
-                      <span className="calc-spec-val">{recommendedLine.production}</span>
-                    </div>
-                  </div>
-
-                  <div className="calc-spec-item">
-                    <div className="calc-spec-icon-box">
-                      <Users size={16} />
-                    </div>
-                    <div>
-                      <span className="calc-spec-lbl">Operarios Requeridos</span>
-                      <span className="calc-spec-val">{recommendedLine.operators}</span>
-                    </div>
-                  </div>
-
-                  <div className="calc-spec-item">
-                    <div className="calc-spec-icon-box">
-                      <Maximize2 size={16} />
-                    </div>
-                    <div>
-                      <span className="calc-spec-lbl">Área en Planta</span>
-                      <span className="calc-spec-val">{recommendedLine.space}</span>
-                    </div>
-                  </div>
+                  ))}
                 </div>
 
-                <div className="calc-why-box">
-                  <h4 className="calc-why-title">
-                    <CheckCircle2 size={15} style={{ display: 'inline', marginRight: '6px', color: '#D97706' }} />
-                    Diagnóstico de coincidencia:
-                  </h4>
-                  <p className="calc-why-text">{recommendedLine.description}</p>
-                </div>
+                {recommendedMachine.equippedPrice && (
+                  <div className="calc-why-box">
+                    <h4 className="calc-why-title">
+                      <CheckCircle2 size={15} style={{ display: 'inline', marginRight: '6px', color: '#D97706' }} />
+                      Opción Línea Equipada: {recommendedMachine.equippedPrice}
+                    </h4>
+                    <p className="calc-why-text">{recommendedMachine.equippedDesc}</p>
+                  </div>
+                )}
 
                 <div className="calc-actions">
                   <a
@@ -447,15 +715,15 @@ export default function Maquinas() {
                     rel="noreferrer"
                     className="btn btn-primary calc-cta-btn"
                   >
-                    <MessageCircle size={18} /> Cotizar esta Línea por WhatsApp <ArrowRight size={16} />
+                    <MessageCircle size={18} /> Cotizar Ficha {recommendedMachine.code} por WhatsApp <ArrowRight size={16} />
                   </a>
 
                   <button
                     type="button"
                     className="btn btn-outline calc-scroll-btn"
-                    onClick={() => scrollToMachine(recommendedLine.id)}
+                    onClick={() => scrollToFicha(recommendedMachine.code)}
                   >
-                    Ver detalles completos en catálogo <ChevronDown size={16} />
+                    Ir a la Ficha Técnica #{recommendedMachine.code} <ChevronDown size={16} />
                   </button>
                 </div>
               </div>
@@ -464,189 +732,24 @@ export default function Maquinas() {
         </div>
       </section>
 
-      {/* ─── SECCIÓN: CLASIFICACIÓN DE MÁQUINAS ─── */}
-      <section id="lineas" className="section-pad">
+      {/* ─── CONDICIONES COMERCIALES PARA COTIZAR (DEL CATÁLOGO OFICIAL) ─── */}
+      <section className="section-pad catalog-conditions-section">
         <div className="container">
-          <div className="section-header reveal maq-reveal">
-            <span className="label-upper">Catálogo Completo</span>
-            <h2 className="heading-xl">
-              Nuestras <span style={{ color: '#D97706' }}>5 Líneas de Producción</span>
-            </h2>
-            <p className="section-subtitle">
-              Explora en detalle la capacidad, operarios y características de cada una de nuestras soluciones de maquinaria bloquera en Colombia.
-            </p>
-          </div>
-
-          <div className="maquinas-lines-stack">
-            {MACHINE_LINES.map((line, idx) => {
-              const isActive = activeLineId === line.id;
-              return (
-                <div
-                  key={line.id}
-                  id={`linea-${line.id}`}
-                  className={`maq-line-card ${isActive ? 'highlighted' : ''}`}
-                  style={{
-                    '--stack-idx': idx + 1,
-                    top: `calc(88px + ${idx * 30}px)`,
-                    zIndex: idx + 1
-                  }}
-                >
-                  <div className="maq-line-img-col">
-                    <div className="maq-line-badge-top">{line.badge}</div>
-                    <img src={line.image} alt={line.name} className="maq-line-img" />
-                    <div className="maq-line-img-glow" />
-                  </div>
-
-                  <div className="maq-line-content-col">
-                    <div className="maq-line-header">
-                      <span className="maq-line-number">0{idx + 1}</span>
-                      <div>
-                        <h3 className="maq-line-title">{line.name}</h3>
-                        <p className="maq-line-tagline">{line.tagline}</p>
-                      </div>
-                    </div>
-
-                    <p className="maq-line-desc">{line.description}</p>
-
-                    {/* Spec Pill Grid */}
-                    <div className="maq-line-specs-grid">
-                      <div className="maq-line-spec-pill">
-                        <Gauge size={16} className="maq-pill-icon" />
-                        <div>
-                          <span className="maq-pill-lbl">Producción / día</span>
-                          <span className="maq-pill-val">{line.production}</span>
-                        </div>
-                      </div>
-
-                      <div className="maq-line-spec-pill">
-                        <Users size={16} className="maq-pill-icon" />
-                        <div>
-                          <span className="maq-pill-lbl">Operarios</span>
-                          <span className="maq-pill-val">{line.operators}</span>
-                        </div>
-                      </div>
-
-                      <div className="maq-line-spec-pill">
-                        <Maximize2 size={16} className="maq-pill-icon" />
-                        <div>
-                          <span className="maq-pill-lbl">Espacio estimado</span>
-                          <span className="maq-pill-val">{line.space}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Feature Bullets */}
-                    <div className="maq-line-features">
-                      <h4 className="maq-features-heading">Ventajas Principales:</h4>
-                      <ul className="maq-features-list">
-                        {line.features.map((feat, fIdx) => (
-                          <li key={fIdx}>
-                            <CheckCircle2 size={16} className="maq-check-icon" />
-                            <span>{feat}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div className="maq-line-footer">
-                      <a
-                        href={`https://wa.me/${BRAND.whatsapp}?text=${encodeURIComponent(line.whatsappMsg)}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="btn btn-primary"
-                      >
-                        <MessageCircle size={16} /> Solicitar Cotización
-                      </a>
-                      <a
-                        href={`tel:${BRAND.phone}`}
-                        className="btn btn-outline"
-                      >
-                        Llamar a Asesor
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ─── SECCIÓN: EQUIPOS COMPLEMENTARIOS (DARK PREMIUM SHOWCASE) ─── */}
-      <section className="section-pad comp-section">
-        <div className="container">
-          <div className="section-header reveal maq-reveal">
-            <span className="label-upper" style={{ color: '#F7BC21', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <Wrench size={14} /> Soluciones Integrales y Periféricas
-            </span>
-            <h2 className="heading-xl" style={{ color: '#FFFFFF' }}>
-              Equipos <span style={{ color: '#F7BC21' }}>Complementarios</span>
-            </h2>
-            <p className="section-subtitle" style={{ color: 'rgba(245, 245, 245, 0.75)' }}>
-              Sistemas periféricos de alto rendimiento diseñados para agilizar la preparación de mezcla, el transporte continuo y el moldeado especializado.
-            </p>
-          </div>
-
-          {/* Featured Showcase Banner for Equipos Complementarios */}
-          <div className="comp-showcase-card reveal maq-reveal">
-            <div className="comp-showcase-img-wrap">
-              <img
-                src="/images/maquinas/equipos_complementarios.png"
-                alt="Planta de Equipos Complementarios Maqte"
-                className="comp-showcase-img"
-              />
-              <div className="comp-showcase-badge">
-                <ShieldCheck size={14} /> Garantía Industrial Maqte
+          <div className="catalog-conditions-card reveal maq-reveal">
+            <div className="catalog-conditions-top">
+              <div className="catalog-conditions-brand">
+                <span className="label-upper" style={{ color: '#F7BC21' }}>Información Comercial Oficial</span>
+                <h3>MAQTECOLOMBIA S.A.S.</h3>
+                <p>Florencia, Caquetá, Colombia · WhatsApp: {BRAND.phone} · www.maqtecolombia.co</p>
+              </div>
+              <div className="catalog-conditions-badge">
+                <ShieldCheck size={18} /> Edición Comercial 2026
               </div>
             </div>
-            <div className="comp-showcase-info">
-              <span className="label-upper" style={{ color: '#F7BC21' }}>Planta de Procesamiento & Logística Interna</span>
-              <h3 className="comp-showcase-title">Maximiza el rendimiento de tu línea de producción</h3>
-              <p className="comp-showcase-desc">
-                La integración de mezcladoras horizontales y bandas automatizadas reduce hasta un **40% el esfuerzo operativo manual**, 
-                garantizando una mezcla homogénea constante y acelerando el suministro continuo hacia la máquina bloquera.
-              </p>
-              <div className="comp-showcase-bullets">
-                <div className="comp-bullet">
-                  <CheckCircle2 size={16} className="maq-check-icon" />
-                  <span>Reducción de tiempos de amasado</span>
-                </div>
-                <div className="comp-bullet">
-                  <CheckCircle2 size={16} className="maq-check-icon" />
-                  <span>Dosificación exacta de agregados</span>
-                </div>
-                <div className="comp-bullet">
-                  <CheckCircle2 size={16} className="maq-check-icon" />
-                  <span>Aceros de alta resistencia al desgaste</span>
-                </div>
-              </div>
+            <div className="catalog-conditions-body">
+              <h4>Condiciones para Cotizar</h4>
+              <p>{CATALOG_CONDITIONS}</p>
             </div>
-          </div>
-
-          {/* Equipos Grid */}
-          <div className="comp-grid">
-            {COMPLEMENTARY_EQUIPMENT.map((item) => {
-              const IconComponent = COMPLEMENTARY_ICONS[item.icon] || RotateCw;
-              return (
-                <div key={item.id} className="comp-card reveal maq-reveal">
-                  <div className="comp-card-top-bar" />
-                  <div className="comp-badge">{item.badge}</div>
-                  <div className="comp-icon-box">
-                    <IconComponent size={26} />
-                  </div>
-                  <h3 className="comp-title">{item.title}</h3>
-                  <p className="comp-desc">{item.desc}</p>
-                  <a
-                    href={`https://wa.me/${BRAND.whatsapp}?text=SW- Hola, quisiera solicitar información sobre ${item.title}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="comp-link"
-                  >
-                    Consultar equipo <ArrowRight size={14} />
-                  </a>
-                </div>
-              );
-            })}
           </div>
         </div>
       </section>
@@ -704,26 +807,25 @@ export default function Maquinas() {
                   <Zap size={14} /> Acompañamiento Técnico & Comercial Directo
                 </span>
                 <h2 className="maq-cta-title">
-                  ¿Listo para potenciar tu obra con <span className="maq-cta-gold">Maquinaria Bloquera?</span>
+                  ¿Listo para cotizar tu <span className="maq-cta-gold">Máquina o Línea Equipada?</span>
                 </h2>
                 <p className="maq-cta-sub">
-                  Te brindamos asesoría integral sin costo: diseño de planta, requerimientos de energía, 
-                  distribución de espacio en fábrica y proyección exacta de retorno de inversión para tu proyecto en Colombia.
+                  Te brindamos asesoría directa desde Florencia, Caquetá para todo el país: confirmación de moldes incluidos, transporte, instalación, puesta en marcha y configuración de planta.
                 </p>
 
                 {/* Trust Pills Bar */}
                 <div className="maq-cta-trust-bar">
                   <div className="maq-cta-trust-pill">
                     <Wrench size={15} className="maq-cta-pill-icon" />
-                    <span>Montaje e Instalación en Sitio</span>
+                    <span>Montaje y Puesta en Marcha</span>
                   </div>
                   <div className="maq-cta-trust-pill">
                     <ShieldCheck size={15} className="maq-cta-pill-icon" />
-                    <span>100% Garantía & Repuestos</span>
+                    <span>Fabricación Nacional Garantizada</span>
                   </div>
                   <div className="maq-cta-trust-pill">
                     <Sparkles size={15} className="maq-cta-pill-icon" />
-                    <span>Moldes Personalizados</span>
+                    <span>Moldes Intercambiables</span>
                   </div>
                 </div>
               </div>
@@ -733,18 +835,18 @@ export default function Maquinas() {
                 <div className="maq-cta-action-card">
                   <div className="maq-cta-card-header">
                     <span className="maq-cta-card-badge">
-                      <span className="maq-cta-pulse-dot" /> Ingenieros Disponibles Ahora
+                      <span className="maq-cta-pulse-dot" /> Atención Directa Maqte
                     </span>
-                    <span className="maq-cta-card-time">Respuesta en &lt; 5 min</span>
+                    <span className="maq-cta-card-time">{BRAND.phone}</span>
                   </div>
 
                   <a
-                    href={`https://wa.me/${BRAND.whatsapp}?text=SW- Hola, deseo agendar una asesoría técnica especializada sobre maquinaria bloquera para mi proyecto.`}
+                    href={`https://wa.me/${BRAND.whatsapp}?text=SW- Hola, deseo recibir una cotización formal del Catálogo de Maquinaria 2026 de Maqte Colombia.`}
                     target="_blank"
                     rel="noreferrer"
                     className="btn btn-primary maq-cta-main-btn"
                   >
-                    <MessageCircle size={20} /> Agendar Asesoría por WhatsApp <ArrowRight size={18} />
+                    <MessageCircle size={20} /> Solicitar Cotización por WhatsApp <ArrowRight size={18} />
                   </a>
 
                   <Link to="/contacto" className="maq-cta-sub-link">
@@ -752,7 +854,7 @@ export default function Maquinas() {
                   </Link>
 
                   <div className="maq-cta-card-footer">
-                    <ShieldCheck size={14} /> Asesoría 100% Gratuita sin compromiso comercial
+                    <ShieldCheck size={14} /> Atención personalizada para proyectos en toda Colombia
                   </div>
                 </div>
               </div>

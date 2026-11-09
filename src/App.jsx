@@ -13,6 +13,7 @@ import Maquinas from './pages/Maquinas';
 import Producto from './pages/Producto';
 import Carrito from './pages/Carrito';
 import Gracias from './pages/Gracias';
+import Cuenta from './pages/Cuenta';
 import CatalogModal from './components/CatalogModal';
 
 // Floating WhatsApp Button
@@ -51,6 +52,8 @@ function AppLayout() {
         <Route path="/tienda" element={<Tienda />} />
         <Route path="/tienda/*" element={<Tienda />} />
         <Route path="/maquinas" element={<Maquinas />} />
+        <Route path="/cuenta" element={<Cuenta />} />
+        <Route path="/bloquera-digital" element={<Cuenta />} />
         <Route path="/nosotros" element={<Nosotros />} />
         <Route path="/marcas" element={<Marcas />} />
         <Route path="/categorias" element={<Categorias />} />

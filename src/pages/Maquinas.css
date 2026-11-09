@@ -549,14 +549,17 @@
 }
 
 .calc-rec-img-wrapper {
-  height: 180px;
+  height: 210px;
   width: 100%;
   border-radius: var(--radius-lg);
   overflow: hidden;
   position: relative;
   margin: 1.25rem 0;
   border: 1px solid #E2E8F0;
-  background: #000;
+  background: #0F172A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .calc-rec-img {
@@ -1435,6 +1438,694 @@
     grid-template-columns: 1fr;
   }
   .maq-line-content-col {
+    padding: 1.5rem;
+  }
+}
+
+/* =============================================================
+   CATÁLOGO OFICIAL 2026: PORTAFOLIO & 10 FICHAS TÉCNICAS
+   ============================================================= */
+
+/* ─── PORTAFOLIO SUMMARY TABLE ─── */
+.portfolio-summary-section {
+  background: #FFFFFF;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.portfolio-table-card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: 0 12px 35px rgba(15, 23, 42, 0.06);
+  margin-top: 2rem;
+}
+
+.portfolio-table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.portfolio-summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  min-width: 780px;
+}
+
+.portfolio-summary-table thead tr {
+  background: #0F172A;
+  color: #FFFFFF;
+}
+
+.portfolio-summary-table th {
+  padding: 1rem 1.25rem;
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.75px;
+  color: #F7BC21;
+  border-bottom: 2px solid rgba(247, 188, 33, 0.35);
+}
+
+.portfolio-summary-table tbody tr {
+  border-bottom: 1px solid #F1F5F9;
+  transition: background 0.18s ease;
+  cursor: pointer;
+}
+
+.portfolio-summary-table tbody tr:hover {
+  background: #FFFBEB;
+}
+
+.portfolio-summary-table td {
+  padding: 1rem 1.25rem;
+  vertical-align: middle;
+  font-size: 0.92rem;
+  color: #1E293B;
+}
+
+.portfolio-code-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: #FEF3C7;
+  color: #B45309;
+  font-weight: 800;
+  font-size: 0.85rem;
+  border: 1px solid #FDE68A;
+}
+
+.portfolio-line-pill {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 0.28rem 0.65rem;
+  border-radius: 999px;
+  background: #F1F5F9;
+  color: #334155;
+  white-space: nowrap;
+}
+
+.portfolio-line-pill.line-artesanal {
+  background: #ECFDF5;
+  color: #047857;
+}
+
+.portfolio-line-pill.line-semiindustrial {
+  background: #EFF6FF;
+  color: #1D4ED8;
+}
+
+.portfolio-line-pill.line-hidraulica-compacta {
+  background: #FEF3C7;
+  color: #B45309;
+}
+
+.portfolio-line-pill.line-hidraulica-industrial {
+  background: #111827;
+  color: #F7BC21;
+}
+
+.portfolio-line-pill.line-complementarios {
+  background: #F3E8FF;
+  color: #6D28D9;
+}
+
+.portfolio-name-cell strong {
+  color: #0F172A;
+  font-weight: 800;
+  font-size: 0.96rem;
+}
+
+.portfolio-price-cell {
+  white-space: nowrap;
+}
+
+.portfolio-price-val {
+  display: block;
+  font-weight: 800;
+  font-size: 0.98rem;
+  color: #0F172A;
+}
+
+.portfolio-price-val.consult {
+  color: #B45309;
+  font-size: 0.86rem;
+}
+
+.portfolio-prev-price {
+  display: block;
+  font-size: 0.75rem;
+  color: #94A3B8;
+  text-decoration: line-through;
+  margin-top: 2px;
+}
+
+.portfolio-equipped-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #FFFBEB;
+  border: 1px solid #FDE68A;
+  color: #92400E;
+  padding: 0.28rem 0.65rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+}
+
+.portfolio-spec-preview {
+  font-size: 0.82rem;
+  color: #64748B;
+}
+
+.portfolio-go-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #F8FAFC;
+  border: 1px solid #CBD5E1;
+  color: #0F172A;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.42rem 0.8rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.portfolio-summary-table tbody tr:hover .portfolio-go-btn {
+  background: #F7BC21;
+  border-color: #F7BC21;
+  color: #0A0A0A;
+}
+
+.portfolio-table-footnote {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.95rem 1.25rem;
+  background: #F8FAFC;
+  border-top: 1px solid #E2E8F0;
+  color: #475569;
+  font-size: 0.84rem;
+  font-weight: 500;
+}
+
+.portfolio-table-footnote svg {
+  color: #D97706;
+  flex-shrink: 0;
+}
+
+/* ─── FICHAS FILTER BAR ─── */
+.fichas-catalog-section {
+  background: #F8FAFC;
+}
+
+.fichas-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  justify-content: center;
+  margin: 2rem 0 2.5rem;
+}
+
+.ficha-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.65rem 1.15rem;
+  border-radius: 999px;
+  border: 1.5px solid #CBD5E1;
+  background: #FFFFFF;
+  color: #334155;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ficha-filter-btn:hover {
+  border-color: #F7BC21;
+  color: #0F172A;
+  transform: translateY(-1px);
+}
+
+.ficha-filter-btn.active {
+  background: #0F172A;
+  border-color: #0F172A;
+  color: #F7BC21;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.18);
+}
+
+.ficha-filter-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  background: #F1F5F9;
+  color: #475569;
+}
+
+.ficha-filter-btn.active .ficha-filter-count {
+  background: #F7BC21;
+  color: #0A0A0A;
+}
+
+/* ─── FICHAS LIST & INDIVIDUAL CARD (STICKY STACKING SCROLL) ─── */
+.fichas-list {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
+  margin-top: 2rem;
+  padding-bottom: 4rem;
+}
+
+.ficha-card {
+  position: sticky;
+  display: grid;
+  grid-template-columns: 0.88fr 1.12fr;
+  background: #FFFFFF;
+  border: 1.5px solid #E2E8F0;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: 0 14px 38px rgba(15, 23, 42, 0.09), 0 -4px 16px rgba(15, 23, 42, 0.05);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+  scroll-margin-top: 100px;
+}
+
+.ficha-card:hover {
+  border-color: #F7BC21;
+  box-shadow: 0 20px 50px rgba(247, 188, 33, 0.18), 0 -4px 16px rgba(15, 23, 42, 0.06);
+}
+
+.ficha-card.highlighted {
+  border: 2.5px solid #F7BC21;
+  box-shadow: 0 0 0 4px rgba(247, 188, 33, 0.25), 0 20px 50px rgba(15, 23, 42, 0.14);
+}
+
+/* Media Column (4:3 AI Studio Photos Edge-to-Edge) */
+.ficha-media-col {
+  position: relative;
+  min-height: 360px;
+  background: #0F172A;
+  overflow: hidden;
+}
+
+.ficha-media-top-badges {
+  position: absolute;
+  top: 1.15rem;
+  left: 1.15rem;
+  right: 1.15rem;
+  z-index: 3;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.ficha-num-badge {
+  background: #0A0A0A;
+  color: #F7BC21;
+  border: 1px solid rgba(247, 188, 33, 0.45);
+  font-size: 0.76rem;
+  font-weight: 900;
+  padding: 0.35rem 0.85rem;
+  border-radius: 20px;
+  letter-spacing: 0.75px;
+  text-transform: uppercase;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+.ficha-line-badge {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(8px);
+  color: #F8FAFC;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 0.32rem 0.8rem;
+  border-radius: 999px;
+}
+
+.ficha-main-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.6s var(--ease-out);
+}
+
+.ficha-card:hover .ficha-main-img {
+  transform: scale(1.04);
+}
+
+/* Body Column */
+.ficha-body-col {
+  padding: 1.85rem 2.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1.1rem;
+}
+
+.ficha-sticky-header {
+  margin-bottom: 0.65rem;
+  align-items: flex-start;
+  gap: 1.1rem;
+}
+
+.ficha-overline {
+  display: block;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #D97706;
+  text-transform: uppercase;
+  margin-bottom: 0.15rem;
+}
+
+.ficha-title {
+  font-size: 1.55rem;
+  font-weight: 900;
+  color: #0F172A;
+  line-height: 1.2;
+  margin-bottom: 0.35rem;
+}
+
+.ficha-desc {
+  font-size: 0.94rem;
+  color: #475569;
+  line-height: 1.5;
+  margin-bottom: 0.5rem;
+}
+
+/* Pricing Box */
+.ficha-pricing-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.ficha-price-main-box {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-left: 4px solid #F7BC21;
+  border-radius: var(--radius-md);
+  padding: 0.95rem 1.15rem;
+}
+
+.ficha-price-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #64748B;
+  margin-bottom: 0.25rem;
+}
+
+.ficha-price-value-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.ficha-price-value {
+  font-size: 1.55rem;
+  font-weight: 900;
+  color: #0F172A;
+  line-height: 1.15;
+}
+
+.ficha-price-value.is-consult {
+  font-size: 1.15rem;
+  color: #B45309;
+}
+
+.ficha-price-previous {
+  font-size: 0.8rem;
+  color: #64748B;
+  font-weight: 600;
+}
+
+.ficha-price-previous del {
+  color: #EF4444;
+  font-weight: 700;
+}
+
+.ficha-price-equipped-box {
+  background: #FFFBEB;
+  border: 1.5px solid #FDE68A;
+  border-radius: var(--radius-md);
+  padding: 0.95rem 1.15rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.ficha-equipped-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #B45309;
+  margin-bottom: 0.2rem;
+}
+
+.ficha-equipped-value {
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: #92400E;
+  line-height: 1.2;
+}
+
+.ficha-equipped-desc {
+  font-size: 0.78rem;
+  color: #78350F;
+  margin-top: 0.2rem;
+  font-weight: 600;
+}
+
+/* Specs Table */
+.ficha-specs-block {
+  margin-bottom: 1.15rem;
+}
+
+.ficha-specs-heading {
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #0F172A;
+  margin-bottom: 0.6rem;
+}
+
+.ficha-specs-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.ficha-specs-table tr {
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.ficha-specs-table tr:last-child {
+  border-bottom: none;
+}
+
+.ficha-specs-table th {
+  width: 38%;
+  background: #F8FAFC;
+  padding: 0.65rem 0.9rem;
+  font-size: 0.83rem;
+  font-weight: 700;
+  color: #334155;
+  text-align: left;
+  border-right: 1px solid #E2E8F0;
+}
+
+.ficha-specs-table td {
+  padding: 0.65rem 0.9rem;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #0F172A;
+  background: #FFFFFF;
+}
+
+/* Scope Note */
+.ficha-scope-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  background: #F8FAFC;
+  border: 1px dashed #CBD5E1;
+  border-radius: 10px;
+  padding: 0.75rem 0.95rem;
+  font-size: 0.82rem;
+  color: #475569;
+  line-height: 1.45;
+}
+
+.ficha-scope-icon {
+  color: #D97706;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* Footer Buttons */
+.ficha-actions-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid #F1F5F9;
+}
+
+.ficha-cta-primary {
+  font-weight: 800;
+}
+
+.ficha-cta-equipped {
+  border-color: #F59E0B !important;
+  color: #B45309 !important;
+  background: #FFFBEB !important;
+  font-weight: 700;
+}
+
+.ficha-cta-equipped:hover {
+  background: #FEF3C7 !important;
+}
+
+.ficha-cta-call {
+  border-color: #CBD5E1 !important;
+  color: #1E293B !important;
+}
+
+.ficha-cta-call:hover {
+  background: #F1F5F9 !important;
+}
+
+/* ─── COMMERCIAL CONDITIONS SECTION ─── */
+.catalog-conditions-section {
+  padding-top: 2.5rem;
+  padding-bottom: 1.5rem;
+}
+
+.catalog-conditions-card {
+  background: #0F172A;
+  color: #F8FAFC;
+  border: 1px solid rgba(247, 188, 33, 0.35);
+  border-radius: var(--radius-xl);
+  padding: 2.25rem 2.5rem;
+  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.18);
+}
+
+.catalog-conditions-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 1.25rem;
+}
+
+.catalog-conditions-brand h3 {
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: #FFFFFF;
+  margin: 0.25rem 0;
+}
+
+.catalog-conditions-brand p {
+  font-size: 0.88rem;
+  color: rgba(248, 250, 252, 0.75);
+}
+
+.catalog-conditions-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(247, 188, 33, 0.14);
+  color: #F7BC21;
+  border: 1px solid rgba(247, 188, 33, 0.35);
+  padding: 0.45rem 0.95rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.catalog-conditions-body h4 {
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #F7BC21;
+  margin-bottom: 0.45rem;
+}
+
+.catalog-conditions-body p {
+  font-size: 0.92rem;
+  color: rgba(248, 250, 252, 0.82);
+  line-height: 1.65;
+}
+
+@media (max-width: 1024px) {
+  .ficha-card {
+    grid-template-columns: 1fr;
+  }
+  .ficha-media-col {
+    min-height: 340px;
+  }
+}
+
+@media (max-width: 768px) {
+  .ficha-card {
+    position: relative !important;
+    top: auto !important;
+  }
+  .ficha-body-col {
+    padding: 1.5rem;
+  }
+  .ficha-title {
+    font-size: 1.35rem;
+  }
+  .ficha-specs-table th,
+  .ficha-specs-table td {
+    display: block;
+    width: 100%;
+    border-right: none;
+  }
+  .ficha-specs-table th {
+    padding-bottom: 0.25rem;
+    border-bottom: none;
+  }
+  .ficha-specs-table td {
+    padding-top: 0.15rem;
+  }
+  .catalog-conditions-card {
     padding: 1.5rem;
   }
 }

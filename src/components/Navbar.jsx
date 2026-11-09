@@ -141,7 +141,12 @@ export default function Navbar() {
             >
               <Search size={18} />
             </button>
-            <Link to="/cuenta" className="navbar-action-btn hide-mobile" aria-label="Mi cuenta">
+            <Link
+              to="/cuenta"
+              className="navbar-action-btn hide-mobile"
+              aria-label="Usuarios · Bloquera Digital"
+              title="Usuarios · Bloquera Digital"
+            >
               <User size={18} />
             </Link>
             <Link to="/carrito" className="navbar-action-btn" aria-label="Carrito">
@@ -256,7 +261,7 @@ export default function Navbar() {
                 </NavLink>
               ))}
               <div className="navbar-mobile-divider" />
-              <NavLink to="/cuenta" className="navbar-mobile-link">Mi Cuenta</NavLink>
+              <NavLink to="/cuenta" className="navbar-mobile-link">Usuarios · Bloquera Digital</NavLink>
               <NavLink to="/carrito" className="navbar-mobile-link">
                 Carrito {cartCount > 0 && `(${cartCount})`}
               </NavLink>
