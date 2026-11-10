@@ -10,6 +10,7 @@ import Marcas from './pages/Marcas';
 import Categorias from './pages/Categorias';
 import Contacto from './pages/Contacto';
 import Maquinas from './pages/Maquinas';
+import MaquinaDetalle from './pages/MaquinaDetalle';
 import Producto from './pages/Producto';
 import Carrito from './pages/Carrito';
 import Gracias from './pages/Gracias';
@@ -52,6 +53,7 @@ function AppLayout() {
         <Route path="/tienda" element={<Tienda />} />
         <Route path="/tienda/*" element={<Tienda />} />
         <Route path="/maquinas" element={<Maquinas />} />
+        <Route path="/maquinas/:slug" element={<MaquinaDetalle />} />
         <Route path="/cuenta" element={<Cuenta />} />
         <Route path="/bloquera-digital" element={<Cuenta />} />
         <Route path="/nosotros" element={<Nosotros />} />

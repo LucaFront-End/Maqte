@@ -1,0 +1,943 @@
+/* ═══════════════════════════════════════════════════════════════════
+   PÁGINA INDIVIDUAL DE MÁQUINA (/maquinas/:slug)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.mq-det-page {
+  background: #F4F6F9;
+  min-height: 100vh;
+}
+
+.mq-det-topbar {
+  background: #121721;
+  color: #CBD5E1;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.mq-det-topbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.mq-det-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.mq-det-breadcrumb a {
+  color: #94A3B8;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.mq-det-breadcrumb a:hover {
+  color: #F7BC21;
+}
+
+.mq-det-breadcrumb .current {
+  color: #FFFFFF;
+}
+
+.mq-det-prevnext {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mq-det-prevnext button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.38rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.06);
+  color: #F8FAFC;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.mq-det-prevnext button:hover {
+  background: #F7BC21;
+  border-color: #F7BC21;
+  color: #111827;
+}
+
+/* ─── HERO PRODUCT GRID ─────────────────────────────────────────── */
+.mq-det-hero {
+  padding: 2.75rem 0 3.25rem;
+  background: #FFFFFF;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.mq-det-hero-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 3rem;
+  align-items: start;
+}
+
+.mq-det-img-frame {
+  background: #F8FAFC;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 22px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.06);
+}
+
+.mq-det-img-badges {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 2;
+}
+
+.mq-det-code-pill {
+  background: #111827;
+  color: #F7BC21;
+  font-size: 0.74rem;
+  font-weight: 900;
+  padding: 0.38rem 0.85rem;
+  border-radius: 999px;
+  letter-spacing: 0.05em;
+}
+
+.mq-det-line-pill {
+  background: rgba(15, 23, 42, 0.85);
+  color: #FFFFFF;
+  font-size: 0.74rem;
+  font-weight: 750;
+  padding: 0.38rem 0.85rem;
+  border-radius: 999px;
+}
+
+.mq-det-main-img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  display: block;
+}
+
+.mq-det-img-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.15rem;
+  background: #121721;
+  color: #CBD5E1;
+  font-size: 0.76rem;
+}
+
+.mq-det-img-footer span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.mq-det-share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #FFFFFF;
+  padding: 0.32rem 0.65rem;
+  border-radius: 6px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.mq-det-quick-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.mq-det-qstat {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 14px;
+  padding: 0.85rem 0.95rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  color: #D97706;
+}
+
+.mq-det-qstat small {
+  display: block;
+  font-size: 0.7rem;
+  color: #64748B;
+  font-weight: 700;
+}
+
+.mq-det-qstat strong {
+  display: block;
+  font-size: 0.8rem;
+  color: #0F172A;
+  font-weight: 850;
+  margin-top: 0.12rem;
+  line-height: 1.3;
+}
+
+/* Right Column Info */
+.mq-det-overline-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.mq-det-badge {
+  display: inline-block;
+  background: rgba(247, 188, 33, 0.18);
+  color: #B45309;
+  border: 1px solid rgba(217, 119, 6, 0.35);
+  font-size: 0.72rem;
+  font-weight: 850;
+  text-transform: uppercase;
+  padding: 0.28rem 0.7rem;
+  border-radius: 999px;
+  letter-spacing: 0.05em;
+}
+
+.mq-det-stock {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 750;
+  color: #059669;
+}
+
+.mq-det-title {
+  font-size: clamp(1.75rem, 3vw, 2.4rem);
+  font-weight: 900;
+  color: #0F172A;
+  line-height: 1.15;
+  margin: 0 0 0.85rem;
+  letter-spacing: -0.02em;
+}
+
+.mq-det-lead {
+  font-size: 0.96rem;
+  color: #475569;
+  line-height: 1.65;
+  margin: 0 0 1.35rem;
+}
+
+/* Package Selector */
+.mq-det-pkg-selector {
+  margin-bottom: 1.25rem;
+}
+
+.mq-det-pkg-label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #334155;
+  margin-bottom: 0.55rem;
+  letter-spacing: 0.04em;
+}
+
+.mq-det-pkg-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.mq-det-pkg-card {
+  text-align: left;
+  padding: 0.95rem 1.05rem;
+  border-radius: 14px;
+  border: 2px solid #E2E8F0;
+  background: #F8FAFC;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.mq-det-pkg-card.active {
+  border-color: #121721;
+  background: #FFFFFF;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+}
+
+.mq-det-pkg-card.pkg-equipped.active {
+  border-color: #F7BC21;
+  background: #FFFBEB;
+}
+
+.mq-det-pkg-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  color: #0F172A;
+  margin-bottom: 0.3rem;
+}
+
+.mq-det-pkg-price {
+  display: block;
+  font-size: 1.12rem;
+  font-weight: 900;
+  color: #B45309;
+  margin-bottom: 0.2rem;
+}
+
+.mq-det-pkg-card small {
+  display: block;
+  font-size: 0.73rem;
+  color: #64748B;
+}
+
+/* Price Panel */
+.mq-det-price-panel {
+  background: #F8FAFC;
+  border-left: 4px solid #F7BC21;
+  border-radius: 14px;
+  padding: 1.1rem 1.35rem;
+  margin-bottom: 1.35rem;
+}
+
+.mq-det-price-caption {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 850;
+  color: #64748B;
+  letter-spacing: 0.06em;
+}
+
+.mq-det-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+  margin: 0.25rem 0;
+}
+
+.mq-det-price-main {
+  font-size: 1.85rem;
+  font-weight: 900;
+  color: #0F172A;
+}
+
+.mq-det-price-old {
+  font-size: 0.88rem;
+  color: #EF4444;
+  font-weight: 700;
+}
+
+.mq-det-price-note {
+  display: block;
+  font-size: 0.75rem;
+  color: #64748B;
+}
+
+/* Primary Action Buttons */
+.mq-det-cta-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.35rem;
+}
+
+.mq-det-btn-buy {
+  flex: 1.2;
+  justify-content: center;
+  padding: 0.95rem 1.35rem;
+  font-size: 0.95rem;
+  font-weight: 850;
+}
+
+.mq-det-btn-quote {
+  flex: 1;
+  justify-content: center;
+  padding: 0.95rem 1.2rem;
+  border-color: #121721 !important;
+  background: #121721 !important;
+  color: #FFFFFF !important;
+}
+
+.mq-det-btn-call {
+  padding: 0.95rem 1.1rem;
+  border-color: #CBD5E1 !important;
+  color: #0F172A !important;
+}
+
+/* Formats Box */
+.mq-det-formats-box {
+  margin-bottom: 1.35rem;
+}
+
+.mq-det-formats-lbl {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #334155;
+  margin-bottom: 0.5rem;
+}
+
+.mq-det-formats-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.mq-det-format-chip {
+  background: #F1F5F9;
+  border: 1px solid #CBD5E1;
+  color: #1E293B;
+  font-size: 0.76rem;
+  font-weight: 750;
+  padding: 0.32rem 0.7rem;
+  border-radius: 8px;
+}
+
+/* Trust Grid */
+.mq-det-trust-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid #E2E8F0;
+}
+
+.mq-det-trust-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: #D97706;
+}
+
+.mq-det-trust-item strong {
+  display: block;
+  font-size: 0.8rem;
+  color: #0F172A;
+}
+
+.mq-det-trust-item span {
+  display: block;
+  font-size: 0.72rem;
+  color: #64748B;
+}
+
+/* ─── "EMPIEZA A GENERAR INGRESOS HOY" SECTION ──────────────────── */
+.mq-det-income-section {
+  padding: 3.5rem 0;
+}
+
+.mq-det-income-card {
+  background: linear-gradient(140deg, #101622 0%, #1B2436 100%);
+  color: #FFFFFF;
+  border-radius: 24px;
+  padding: 2.75rem;
+  display: grid;
+  grid-template-columns: 1.15fr 0.95fr;
+  gap: 2.5rem;
+  align-items: center;
+  border: 1px solid rgba(247, 188, 33, 0.3);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+}
+
+.mq-det-income-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(247, 188, 33, 0.18);
+  border: 1px solid rgba(247, 188, 33, 0.45);
+  color: #F7BC21;
+  font-size: 0.75rem;
+  font-weight: 850;
+  text-transform: uppercase;
+  padding: 0.38rem 0.85rem;
+  border-radius: 999px;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
+}
+
+.mq-det-income-title {
+  font-size: clamp(1.55rem, 2.6vw, 2.15rem);
+  font-weight: 900;
+  color: #FFFFFF;
+  line-height: 1.18;
+  margin: 0 0 0.85rem;
+}
+
+.mq-det-income-lead {
+  font-size: 0.95rem;
+  color: #CBD5E1;
+  line-height: 1.6;
+  margin: 0 0 1.35rem;
+}
+
+.mq-det-income-lead strong {
+  color: #F7BC21;
+}
+
+.mq-det-roi-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.65rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.mq-det-roi-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  font-size: 0.9rem;
+  color: #E2E8F0;
+  line-height: 1.48;
+}
+
+.mq-det-roi-icon {
+  color: #10B981;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.mq-det-income-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.mq-det-income-wa {
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  color: #FFFFFF !important;
+}
+
+/* Quick Revenue Simulator Card */
+.mq-det-income-sim {
+  background: #FFFFFF;
+  color: #0F172A;
+  border-radius: 20px;
+  padding: 1.85rem;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25);
+}
+
+.mq-det-sim-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 850;
+  text-transform: uppercase;
+  color: #B45309;
+  background: #FEF3C7;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  margin-bottom: 0.45rem;
+}
+
+.mq-det-sim-header h3 {
+  font-size: 1.2rem;
+  font-weight: 900;
+  margin: 0 0 0.25rem;
+  color: #0F172A;
+}
+
+.mq-det-sim-header p {
+  font-size: 0.8rem;
+  color: #64748B;
+  margin: 0 0 1.15rem;
+}
+
+.mq-det-sim-sliders {
+  display: flex;
+  flex-direction: column;
+  gap: 0.95rem;
+  margin-bottom: 1.25rem;
+}
+
+.mq-det-sim-lbl-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  margin-bottom: 0.3rem;
+}
+
+.mq-det-sim-lbl-row label {
+  color: #475569;
+  font-weight: 700;
+}
+
+.mq-det-sim-lbl-row strong {
+  color: #0F172A;
+  font-weight: 850;
+}
+
+.mq-det-sim-field input[type='range'] {
+  width: 100%;
+  accent-color: #F7BC21;
+  cursor: pointer;
+}
+
+.mq-det-sim-results {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+
+.mq-det-sim-kpi {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+}
+
+.mq-det-sim-kpi.featured {
+  background: #ECFDF5;
+  border-color: #6EE7B7;
+}
+
+.mq-det-sim-kpi small {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 750;
+  color: #475569;
+}
+
+.mq-det-sim-kpi strong {
+  display: block;
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: #0F172A;
+  margin-top: 0.2rem;
+}
+
+.mq-det-sim-kpi.featured strong {
+  color: #047857;
+}
+
+.mq-det-sim-disclaimer {
+  display: block;
+  font-size: 0.72rem;
+  color: #64748B;
+  line-height: 1.45;
+}
+
+.mq-det-sim-disclaimer a {
+  color: #B45309;
+  font-weight: 800;
+}
+
+/* ─── TECHNICAL TABS ────────────────────────────────────────────── */
+.mq-det-tabs-section {
+  padding: 0 0 4rem;
+}
+
+.mq-det-tabs-bar {
+  display: flex;
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.mq-det-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.25rem;
+  border-radius: 12px;
+  border: 1.5px solid #E2E8F0;
+  background: #FFFFFF;
+  color: #475569;
+  font-size: 0.88rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.mq-det-tab-btn.active {
+  background: #121721;
+  border-color: #121721;
+  color: #F7BC21;
+}
+
+.mq-det-tab-panel {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 20px;
+  padding: 2.25rem;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+}
+
+.mq-det-specs-layout {
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: 2.25rem;
+  align-items: start;
+}
+
+.mq-det-specs-layout h3 {
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: #0F172A;
+  margin: 0 0 0.75rem;
+}
+
+.mq-det-scope-callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  background: #FFFBEB;
+  border: 1px solid #FDE68A;
+  color: #92400E;
+  padding: 1rem 1.15rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.mq-det-specs-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.mq-det-specs-table th,
+.mq-det-specs-table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid #E2E8F0;
+  text-align: left;
+  font-size: 0.88rem;
+}
+
+.mq-det-specs-table th {
+  width: 40%;
+  color: #475569;
+  font-weight: 750;
+  background: #F8FAFC;
+}
+
+.mq-det-specs-table td {
+  color: #0F172A;
+  font-weight: 700;
+}
+
+.mq-det-check-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.mq-det-check-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  font-size: 0.9rem;
+  color: #1E293B;
+  font-weight: 650;
+}
+
+.mq-det-check-list li svg {
+  color: #10B981;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.mq-det-complements-box {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  padding: 1.35rem;
+}
+
+.mq-det-complements-box h4 {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+  font-weight: 850;
+  color: #0F172A;
+}
+
+.mq-det-complements-box p {
+  margin: 0 0 1rem;
+  font-size: 0.84rem;
+  color: #64748B;
+}
+
+.mq-det-comp-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.mq-det-comp-item {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.75rem;
+  border-radius: 12px;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  text-decoration: none;
+  color: #0F172A;
+  transition: all 0.18s ease;
+}
+
+.mq-det-comp-item:hover {
+  border-color: #F7BC21;
+  transform: translateX(3px);
+}
+
+.mq-det-comp-item img {
+  width: 58px;
+  height: 46px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.mq-det-comp-item div {
+  flex: 1;
+}
+
+.mq-det-comp-item strong {
+  display: block;
+  font-size: 0.84rem;
+}
+
+.mq-det-comp-item span {
+  display: block;
+  font-size: 0.75rem;
+  color: #64748B;
+}
+
+/* ─── DIRECT PURCHASE MODAL ─────────────────────────────────────── */
+.mq-buy-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.mq-buy-modal {
+  background: #FFFFFF;
+  border-radius: 20px;
+  max-width: 540px;
+  width: 100%;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+
+.mq-buy-modal-header {
+  background: #121721;
+  color: #FFFFFF;
+  padding: 1.35rem 1.65rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 3px solid #F7BC21;
+}
+
+.mq-buy-modal-header h3 {
+  margin: 0.35rem 0 0.2rem;
+  font-size: 1.2rem;
+  color: #FFFFFF;
+}
+
+.mq-buy-modal-header p {
+  margin: 0;
+  font-size: 0.84rem;
+  color: #CBD5E1;
+}
+
+.mq-buy-modal-header p strong {
+  color: #F7BC21;
+}
+
+.mq-buy-modal-close {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #FFFFFF;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.mq-buy-modal-form {
+  padding: 1.5rem 1.65rem 1.65rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.95rem;
+}
+
+.mq-buy-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+}
+
+.mq-buy-field label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 750;
+  color: #334155;
+  margin-bottom: 0.35rem;
+}
+
+.mq-buy-field input,
+.mq-buy-field select {
+  width: 100%;
+  padding: 0.68rem 0.85rem;
+  border-radius: 10px;
+  border: 1.5px solid #CBD5E1;
+  font-size: 0.88rem;
+  color: #0F172A;
+}
+
+@media (max-width: 1024px) {
+  .mq-det-hero-grid,
+  .mq-det-income-card,
+  .mq-det-specs-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .mq-det-quick-stats,
+  .mq-det-pkg-grid,
+  .mq-det-trust-grid,
+  .mq-det-sim-results,
+  .mq-buy-row {
+    grid-template-columns: 1fr;
+  }
+
+  .mq-det-income-card {
+    padding: 1.5rem;
+  }
+}
+

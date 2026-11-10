@@ -574,8 +574,8 @@
 
 .cuenta-sections-tabs {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 0.65rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
   padding: 0.85rem 0;
 }
 
@@ -1000,4 +1000,58 @@
     padding: 1.2rem;
   }
 }
+
+.cuenta-locked-auth-grid {
+  display: grid;
+  grid-template-columns: 1fr 0.95fr;
+  gap: 2rem;
+  align-items: start;
+  margin-top: 0.75rem;
+}
+
+.cuenta-locked-left {
+  text-align: left;
+  margin: 0;
+  max-width: none;
+  padding: 2.5rem 2.25rem;
+}
+
+.cuenta-locked-left .cuenta-locked-icon {
+  margin: 0 0 1.2rem;
+}
+
+.cuenta-locked-left p {
+  margin: 0 0 1.25rem;
+  max-width: none;
+}
+
+.cuenta-locked-benefits {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.65rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.cuenta-locked-benefits li {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.cuenta-locked-benefits li svg {
+  color: #10B981;
+  flex-shrink: 0;
+}
+
+@media (max-width: 980px) {
+  .cuenta-locked-auth-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 

@@ -1,18 +1,22 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  CheckCircle2, ArrowRight, Zap, Gauge,
+  CheckCircle2, ArrowRight, ArrowLeft, Zap, Gauge,
   Sparkles, Cpu, MessageCircle, ChevronDown,
   ShieldCheck, Wrench, Check, Award, Phone,
-  FileText, Layers, Info, Tag
+  FileText, Layers, Info, Tag, ShoppingBag, Eye,
+  User, Mail, MapPin, Globe, Sliders, RotateCcw
 } from 'lucide-react';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import {
   BRAND,
   MACHINE_CATALOG_2026,
+  MACHINE_CATEGORIES_2026,
   CATALOG_CONDITIONS,
   INNOVATION_ITEMS
 } from '../data/content';
+import { saveLeadStep1, updateLeadFinal } from '../lib/wixCms';
+import MaquinasCarousel from '../components/MaquinasCarousel';
 import './Maquinas.css';
 
 const LINE_FILTERS = [
@@ -24,6 +28,132 @@ const LINE_FILTERS = [
   { id: 'complementarios', label: 'Equipos Complementarios', count: 2 },
 ];
 
+const WIZARD_STEPS = [
+  { step: 1, short: 'Tus Datos', title: 'Datos de contacto' },
+  { step: 2, short: 'Ladrillos / Día', title: 'Producción diaria' },
+  { step: 3, short: 'Nivel Producción', title: 'Nivel de planta' },
+  { step: 4, short: 'Presupuesto', title: 'Rango de inversión' },
+  { step: 5, short: 'Tipo de Ladrillo', title: 'Formato a fabricar' },
+  { step: 6, short: '¡Enviado!', title: 'Cotización lista' },
+];
+
+const DAILY_BRICKS_OPTIONS = [
+  {
+    id: 'hasta-300',
+    label: 'Hasta 300 ladrillos / día',
+    tag: 'Iniciación · Fichas 01–02',
+    sub: 'Ideal para obra propia, autoconstrucción o taller inicial.',
+  },
+  {
+    id: '300-900',
+    label: '300 a 900 ladrillos / día',
+    tag: 'Ponedora Móvil · Ficha 03',
+    sub: '4 bloques H10 por ciclo descargando directo en pista.',
+  },
+  {
+    id: '1000-2500',
+    label: '1.000 a 2.500 ladrillos / día',
+    tag: 'Semiindustrial · Fichas 04–05',
+    sub: 'Abastecimiento continuo a ferreterías y obras locales.',
+  },
+  {
+    id: '2500-4500',
+    label: '2.500 a 4.500 ladrillos / día',
+    tag: 'Hidráulica Compacta · Ficha 06',
+    sub: 'Compactación hidráulica estacionaria de alta densidad.',
+  },
+  {
+    id: '4500-7000',
+    label: '4.500 a 7.000+ ladrillos / día',
+    tag: 'Industrial / PLC · Fichas 07–08',
+    sub: 'Planta industrial de alto volumen para constructoras.',
+  },
+];
+
+const PROD_LEVEL_OPTIONS = [
+  {
+    id: 'artesanal-manual',
+    label: 'Artesanal Compacta',
+    tag: 'Fichas 01–02',
+    sub: 'Operación manual pura o con motovibrador integrado.',
+  },
+  {
+    id: 'artesanal-ponedora',
+    label: 'Ponedora Móvil (Sin tablas)',
+    tag: 'Ficha 03',
+    sub: 'Deposita los bloques directamente sobre piso nivelado.',
+  },
+  {
+    id: 'semiindustrial',
+    label: 'Semiindustrial Estacionaria o Móvil',
+    tag: 'Fichas 04–05',
+    sub: 'Bloquera fija manual o ponedora grande de alto rendimiento.',
+  },
+  {
+    id: 'hidraulica-compacta',
+    label: 'Hidráulica Compacta Fija',
+    tag: 'Ficha 06',
+    sub: 'Accionamiento hidráulico individual o en línea equipada.',
+  },
+  {
+    id: 'hidraulica-industrial',
+    label: 'Hidráulica Industrial / Automática PLC',
+    tag: 'Fichas 07–08',
+    sub: 'Mandos hidráulicos industriales o automatización PLC Kinco + HMI 7”.',
+  },
+];
+
+const BRICK_TYPE_OPTIONS = [
+  {
+    id: 'bloque-h10-h12',
+    label: 'Bloque Estándar H10 / H12',
+    tag: '10×20×40 y 12×20×40 cm',
+    sub: 'El formato comercial de mayor rotación en ferreterías.',
+  },
+  {
+    id: 'bloque-estructural',
+    label: 'Bloque Estructural H15 / H20',
+    tag: '15×20×40 y 20×20×40 cm',
+    sub: 'Mampostería estructural y proyectos de ingeniería civil.',
+  },
+  {
+    id: 'ladrillo-macizo',
+    label: 'Ladrillo Macizo / Prensado',
+    tag: 'Formato tradicional',
+    sub: 'Ladrillo de concreto para muros portantes y fachadas.',
+  },
+  {
+    id: 'adoquin',
+    label: 'Adoquín Peatonal y Vehicular',
+    tag: 'Tráfico liviano y pesado',
+    sub: 'Proyectos de urbanismo, vías, parques y plazoletas.',
+  },
+  {
+    id: 'multiformato',
+    label: 'Varios Formatos (Moldes Intercambiables)',
+    tag: 'Planta polivalente',
+    sub: 'Fabricación de bloques, ladrillos, adoquines y bovedillas.',
+  },
+];
+
+const BUDGET_PRESETS = [
+  { val: 2100000, label: '$2.1M' },
+  { val: 8300000, label: '$8.3M' },
+  { val: 22000000, label: '$22M' },
+  { val: 28000000, label: '$28M' },
+  { val: 65800000, label: '$65.8M' },
+  { val: 129800000, label: '$129.8M' },
+  { val: 189800000, label: '$189.8M' },
+];
+
+function formatCOPAmount(n) {
+  return new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    maximumFractionDigits: 0,
+  }).format(Number.isFinite(n) ? n : 0);
+}
+
 export default function Maquinas() {
   useScrollReveal('.maq-reveal');
 
@@ -31,10 +161,24 @@ export default function Maquinas() {
   const [selectedLineFilter, setSelectedLineFilter] = useState('all');
   const [activeFichaCode, setActiveFichaCode] = useState(null);
 
-  // Calculator State (3 Questions mapped to the 2026 Catalog)
-  const [scaleTarget, setScaleTarget] = useState('artesanal-ponedora');
-  const [budgetRange, setBudgetRange] = useState('8m-22m');
-  const [operationMode, setOperationMode] = useState('ponedora-movil');
+  // ── 6-Step Multi-Step Wizard State ──
+  const [wizardStep, setWizardStep] = useState(1);
+  const [contactForm, setContactForm] = useState({
+    nombre: '',
+    telefono: '',
+    ciudad: '',
+    pais: 'Colombia',
+    correo: '',
+  });
+  const [step1Error, setStep1Error] = useState('');
+  const [savingCms, setSavingCms] = useState(false);
+  const [leadRecord, setLeadRecord] = useState(null);
+
+  // Steps 2 to 5 answers
+  const [dailyBricks, setDailyBricks] = useState('300-900');
+  const [prodLevel, setProdLevel] = useState('artesanal-ponedora');
+  const [budgetCOP, setBudgetCOP] = useState(28000000);
+  const [brickType, setBrickType] = useState('bloque-h10-h12');
 
   const filteredCatalog = useMemo(() => {
     if (selectedLineFilter === 'all') return MACHINE_CATALOG_2026;
@@ -54,63 +198,74 @@ export default function Maquinas() {
       '08': 0,
     };
 
-    // Question 1: Scale target
-    if (scaleTarget === 'artesanal-manual') {
+    // Step 2: Daily bricks target
+    if (dailyBricks === 'hasta-300') {
       scores['01'] += 45;
       scores['02'] += 50;
-      scores['03'] += 15;
-    } else if (scaleTarget === 'artesanal-ponedora') {
+    } else if (dailyBricks === '300-900') {
       scores['03'] += 50;
-      scores['02'] += 20;
+      scores['02'] += 25;
       scores['04'] += 20;
-    } else if (scaleTarget === 'semiindustrial') {
+    } else if (dailyBricks === '1000-2500') {
       scores['04'] += 45;
       scores['05'] += 50;
       scores['06'] += 20;
-    } else if (scaleTarget === 'hidraulica-compacta') {
+    } else if (dailyBricks === '2500-4500') {
       scores['06'] += 55;
       scores['05'] += 20;
-      scores['07'] += 20;
-    } else if (scaleTarget === 'hidraulica-industrial') {
-      scores['07'] += 50;
-      scores['08'] += 55;
-      scores['06'] += 15;
-    }
-
-    // Question 2: Budget range
-    if (budgetRange === '1m-3m') {
-      scores['01'] += 45;
-      scores['02'] += 45;
-    } else if (budgetRange === '8m-22m') {
-      scores['03'] += 40;
-      scores['04'] += 40;
-      scores['05'] += 45;
-    } else if (budgetRange === '28m-66m') {
-      scores['06'] += 50;
-      scores['05'] += 15;
-    } else if (budgetRange === '88m-130m') {
-      scores['07'] += 50;
-      scores['08'] += 35;
-    } else if (budgetRange === '130m-190m') {
-      scores['08'] += 55;
       scores['07'] += 25;
+    } else if (dailyBricks === '4500-7000') {
+      scores['07'] += 50;
+      scores['08'] += 60;
     }
 
-    // Question 3: Operation mode
-    if (operationMode === 'manual-compacta') {
-      scores['01'] += 35;
-      scores['04'] += 20;
-    } else if (operationMode === 'manual-vibracion') {
-      scores['02'] += 38;
-      scores['04'] += 35;
-    } else if (operationMode === 'ponedora-movil') {
-      scores['03'] += 38;
-      scores['05'] += 38;
-    } else if (operationMode === 'hidraulica-manual') {
-      scores['06'] += 35;
-      scores['07'] += 38;
-    } else if (operationMode === 'plc-automatica') {
-      scores['08'] += 50;
+    // Step 3: Production level
+    if (prodLevel === 'artesanal-manual') {
+      scores['01'] += 45;
+      scores['02'] += 50;
+    } else if (prodLevel === 'artesanal-ponedora') {
+      scores['03'] += 55;
+      scores['05'] += 20;
+    } else if (prodLevel === 'semiindustrial') {
+      scores['04'] += 45;
+      scores['05'] += 50;
+    } else if (prodLevel === 'hidraulica-compacta') {
+      scores['06'] += 60;
+    } else if (prodLevel === 'hidraulica-industrial') {
+      scores['07'] += 50;
+      scores['08'] += 60;
+    }
+
+    // Step 4: Budget slider in COP
+    if (budgetCOP <= 3000000) {
+      scores['01'] += 50;
+      scores['02'] += 55;
+    } else if (budgetCOP <= 14000000) {
+      scores['03'] += 55;
+      scores['04'] += 45;
+    } else if (budgetCOP <= 25000000) {
+      scores['05'] += 55;
+      scores['04'] += 40;
+    } else if (budgetCOP <= 70000000) {
+      scores['06'] += 60;
+      scores['05'] += 20;
+    } else if (budgetCOP <= 135000000) {
+      scores['07'] += 60;
+      scores['08'] += 45;
+    } else {
+      scores['08'] += 65;
+      scores['07'] += 35;
+    }
+
+    // Step 5: Brick / block type
+    if (brickType === 'bloque-estructural' || brickType === 'adoquin') {
+      scores['06'] += 15;
+      scores['07'] += 20;
+      scores['08'] += 20;
+    } else if (brickType === 'multiformato') {
+      scores['05'] += 15;
+      scores['06'] += 20;
+      scores['08'] += 25;
     }
 
     let bestCode = '03';
@@ -123,16 +278,114 @@ export default function Maquinas() {
     });
 
     return MACHINE_CATALOG_2026.find(m => m.code === bestCode) || MACHINE_CATALOG_2026[2];
-  }, [scaleTarget, budgetRange, operationMode]);
+  }, [dailyBricks, prodLevel, budgetCOP, brickType]);
+
+  const selectedDailyLabel =
+    DAILY_BRICKS_OPTIONS.find(o => o.id === dailyBricks)?.label || dailyBricks;
+  const selectedLevelLabel =
+    PROD_LEVEL_OPTIONS.find(o => o.id === prodLevel)?.label || prodLevel;
+  const selectedBrickLabel =
+    BRICK_TYPE_OPTIONS.find(o => o.id === brickType)?.label || brickType;
+  const formattedBudget = `${formatCOPAmount(budgetCOP)} COP`;
 
   const dynamicWhatsappUrl = useMemo(() => {
+    const clientLine = contactForm.nombre
+      ? `👤 *Cliente:* ${contactForm.nombre} (${contactForm.ciudad}, ${contactForm.pais})\n📞 *Tel:* ${contactForm.telefono} · ✉️ ${contactForm.correo}\n\n`
+      : '';
     const text =
-      `SW- Hola, utilicé el Asesor de Selección en la página de Maqte Colombia.\n\n` +
-      `🎯 Equipo recomendado: Ficha ${recommendedMachine.code} — ${recommendedMachine.name} (${recommendedMachine.line})\n` +
-      `💰 Referencia comercial: ${recommendedMachine.price}${recommendedMachine.equippedPrice ? ` (Línea equipada: ${recommendedMachine.equippedPrice})` : ''}\n\n` +
-      `Me gustaría recibir asesoría técnica y cotización formal.`;
+      `SW- Hola Maqte Colombia, completé el configurador de maquinaria en su web:\n\n` +
+      clientLine +
+      `🧱 *1. Ladrillos por día:* ${selectedDailyLabel}\n` +
+      `⚙️ *2. Nivel de producción:* ${selectedLevelLabel}\n` +
+      `💰 *3. Presupuesto estimado:* ${formattedBudget}\n` +
+      `📐 *4. Tipo de ladrillo/bloque:* ${selectedBrickLabel}\n\n` +
+      `🎯 *Máquina Recomendada:* Ficha ${recommendedMachine.code} — ${recommendedMachine.name} (${recommendedMachine.price}${recommendedMachine.equippedPrice ? ` | Línea equipada: ${recommendedMachine.equippedPrice}` : ''})\n\n` +
+      `Quedo atento(a) a la cotización formal y asesoría técnica.`;
     return `https://wa.me/${BRAND.whatsapp}?text=${encodeURIComponent(text)}`;
-  }, [recommendedMachine]);
+  }, [
+    contactForm,
+    selectedDailyLabel,
+    selectedLevelLabel,
+    formattedBudget,
+    selectedBrickLabel,
+    recommendedMachine,
+  ]);
+
+  // Step 1 -> Step 2 handler (Saves lead immediately in Wix CMS)
+  const handleStep1Submit = async (e) => {
+    e.preventDefault();
+    if (
+      !contactForm.nombre.trim() ||
+      !contactForm.telefono.trim() ||
+      !contactForm.ciudad.trim() ||
+      !contactForm.pais.trim() ||
+      !contactForm.correo.trim()
+    ) {
+      setStep1Error('Por favor completa todos tus datos de contacto para continuar.');
+      return;
+    }
+    setStep1Error('');
+    const contactSnapshot = { ...contactForm };
+    const createdAt = new Date().toISOString();
+    setLeadRecord({
+      id: `pending_${Date.now()}`,
+      wixId: null,
+      syncedToWix: false,
+      createdAt,
+      contact: contactSnapshot,
+    });
+    setWizardStep(2);
+    setSavingCms(true);
+    try {
+      const saved = await saveLeadStep1(contactSnapshot);
+      setLeadRecord({
+        id: saved.id,
+        wixId: saved.wixId,
+        syncedToWix: saved.syncedToWix,
+        createdAt: saved.record?.fechaCreacion || createdAt,
+        contact: contactSnapshot,
+      });
+    } finally {
+      setSavingCms(false);
+    }
+  };
+
+  // Step 5 -> Step 6 handler (Updates the CMS record created in Step 1 with all project answers)
+  const handleFinishWizard = async () => {
+    const currentLead = leadRecord || { contact: { ...contactForm } };
+    setWizardStep(6);
+    setSavingCms(true);
+    try {
+      const updated = await updateLeadFinal(
+        currentLead,
+        {
+          dailyBricks,
+          dailyBricksLabel: selectedDailyLabel,
+          prodLevel,
+          prodLevelLabel: selectedLevelLabel,
+          budgetCOP,
+          budgetFormatted: formattedBudget,
+          brickType,
+          brickTypeLabel: selectedBrickLabel,
+        },
+        recommendedMachine
+      );
+      setLeadRecord(prev => ({
+        ...(prev || {}),
+        id: updated.id,
+        wixId: updated.wixId,
+        syncedToWix: updated.syncedToWix,
+        completed: true,
+      }));
+    } finally {
+      setSavingCms(false);
+    }
+  };
+
+  const handleResetWizard = () => {
+    setWizardStep(1);
+    setLeadRecord(null);
+  };
 
   const scrollToFicha = (code) => {
     setSelectedLineFilter('all');
@@ -250,6 +503,76 @@ export default function Maquinas() {
         </div>
       </section>
 
+      {/* ─── SECCIÓN DE CATEGORÍAS DE MAQUINARIA (ESTILO CATEGORÍAS) ─── */}
+      <section id="categorias-maquinaria" className="section-pad mq-cats-section">
+        <div className="container">
+          <div className="section-header reveal maq-reveal">
+            <span className="label-upper" style={{ color: '#D97706', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <Layers size={14} /> Líneas de Producción 2026
+            </span>
+            <h2 className="heading-xl">
+              Explorar Maquinaria por <span style={{ color: '#D97706' }}>Categoría</span>
+            </h2>
+            <p className="section-subtitle">
+              5 líneas especializadas según tu escala de inversión: desde equipos manuales para iniciar hoy mismo hasta plantas automáticas PLC Kinco.
+            </p>
+          </div>
+
+          <div className="mq-cats-grid">
+            {MACHINE_CATEGORIES_2026.map((cat) => {
+              const catMachines = MACHINE_CATALOG_2026.filter(m => m.lineId === cat.id);
+              return (
+                <div
+                  key={cat.id}
+                  className="mq-cat-block reveal maq-reveal"
+                  style={{ '--mq-cat-accent': cat.accent }}
+                >
+                  <div className="mq-cat-header">
+                    <div className="mq-cat-icon-box">
+                      <Layers size={22} />
+                    </div>
+                    <div className="mq-cat-header-text">
+                      <div className="mq-cat-title-row">
+                        <h3>{cat.title}</h3>
+                        <span className="mq-cat-badge">{cat.badge}</span>
+                      </div>
+                      <p>{cat.description}</p>
+                    </div>
+                    <button
+                      type="button"
+                      className="mq-cat-filter-link"
+                      onClick={() => {
+                        setSelectedLineFilter(cat.id);
+                        document.getElementById('fichas')?.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                    >
+                      Ver fichas <ArrowRight size={14} />
+                    </button>
+                  </div>
+
+                  <div className="mq-cat-subs-grid">
+                    {catMachines.map(m => (
+                      <Link
+                        key={m.id}
+                        to={`/maquinas/${m.id}`}
+                        className="mq-cat-sub-card"
+                      >
+                        <img src={m.image} alt={m.name} className="mq-cat-sub-thumb" loading="lazy" />
+                        <div className="mq-cat-sub-info">
+                          <span className="mq-cat-sub-code">FICHA {m.code} · {m.priceShort}</span>
+                          <strong className="mq-cat-sub-name">{m.name}</strong>
+                        </div>
+                        <ArrowRight size={15} className="mq-cat-sub-arrow" />
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
       {/* ─── PORTAFOLIO DE EQUIPOS: GUÍA RÁPIDA DE REFERENCIAS Y PRECIOS ─── */}
       <section id="portafolio" className="section-pad portfolio-summary-section">
         <div className="container">
@@ -318,16 +641,25 @@ export default function Maquinas() {
                         )}
                       </td>
                       <td style={{ textAlign: 'right' }}>
-                        <button
-                          type="button"
-                          className="portfolio-go-btn"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            scrollToFicha(item.code);
-                          }}
-                        >
-                          Ver ficha <ArrowRight size={14} />
-                        </button>
+                        <div className="portfolio-row-btns">
+                          <Link
+                            to={`/maquinas/${item.id}`}
+                            className="portfolio-detail-btn"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            Ver detalles
+                          </Link>
+                          <button
+                            type="button"
+                            className="portfolio-go-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              scrollToFicha(item.code);
+                            }}
+                          >
+                            Ficha <ArrowRight size={14} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -397,12 +729,14 @@ export default function Maquinas() {
                       <span className="ficha-num-badge">FICHA {item.code}</span>
                       <span className="ficha-line-badge">{item.line}</span>
                     </div>
-                    <img
-                      src={item.image}
-                      alt={`${item.code} - ${item.name}`}
-                      className="ficha-main-img maq-line-img"
-                      loading="lazy"
-                    />
+                    <Link to={`/maquinas/${item.id}`} className="ficha-media-link" title={`Ver página de ${item.name}`}>
+                      <img
+                        src={item.image}
+                        alt={`${item.code} - ${item.name}`}
+                        className="ficha-main-img maq-line-img"
+                        loading="lazy"
+                      />
+                    </Link>
                     <div className="maq-line-img-glow" />
                   </div>
 
@@ -416,7 +750,9 @@ export default function Maquinas() {
                           <span className="ficha-overline">
                             {item.code} &nbsp;/&nbsp; {item.line.toUpperCase()}
                           </span>
-                          <h3 className="ficha-title">{item.name}</h3>
+                          <Link to={`/maquinas/${item.id}`} className="ficha-title-link">
+                            <h3 className="ficha-title">{item.name}</h3>
+                          </Link>
                           <p className="ficha-desc">{item.description}</p>
                         </div>
                       </div>
@@ -472,16 +808,34 @@ export default function Maquinas() {
                       )}
                     </div>
 
-                    {/* Footer Actions */}
+                    {/* Footer Actions: Comprar · Cotizar · Ver detalles */}
                     <div className="ficha-actions-footer">
+                      <a
+                        href={`https://wa.me/${BRAND.whatsapp}?text=${encodeURIComponent(
+                          `SW- Hola Maqte Colombia, quiero COMPRAR la Ficha ${item.code}: ${item.name} (${item.price}). Por favor indíquenme el proceso de pedido y pago.`
+                        )}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="btn btn-primary ficha-cta-buy"
+                      >
+                        <ShoppingBag size={17} /> Comprar
+                      </a>
+
                       <a
                         href={`https://wa.me/${BRAND.whatsapp}?text=${encodeURIComponent(item.whatsappMsg)}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="btn btn-primary ficha-cta-primary"
+                        className="btn btn-outline ficha-cta-quote"
                       >
                         <MessageCircle size={17} /> Cotizar Ficha {item.code}
                       </a>
+
+                      <Link
+                        to={`/maquinas/${item.id}`}
+                        className="btn btn-outline ficha-cta-details"
+                      >
+                        <Eye size={16} /> Ver detalles <ArrowRight size={15} />
+                      </Link>
 
                       {item.equippedPrice && (
                         <a
@@ -493,13 +847,6 @@ export default function Maquinas() {
                           <Layers size={16} /> Cotizar Línea Equipada ({item.equippedPrice})
                         </a>
                       )}
-
-                      <a
-                        href={`tel:${BRAND.phone}`}
-                        className="btn btn-outline ficha-cta-call"
-                      >
-                        <Phone size={15} /> Llamar a Asesor
-                      </a>
                     </div>
                   </div>
                 </article>
@@ -509,150 +856,509 @@ export default function Maquinas() {
         </div>
       </section>
 
-      {/* ─── SECCIÓN INTERACTIVA: ¿QUÉ MÁQUINA NECESITO? ─── */}
+      {/* ─── SECCIÓN INTERACTIVA MULTI-PASO (6 PASOS CON GUARDADO EN CMS) ─── */}
       <section id="calculadora" className="section-pad calc-section">
         <div className="container">
           <div className="section-header calc-header reveal maq-reveal">
             <span className="label-upper" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#D97706' }}>
-              <Sparkles size={14} /> Asesor Virtual de Selección 2026
+              <Sparkles size={14} /> Configurador Interactivo Multi-Paso 2026
             </span>
             <h2 className="heading-xl" style={{ fontSize: '2.5rem', marginTop: '0.5rem' }}>
               ¿Qué máquina <span className="calc-title-highlight">necesito?</span>
             </h2>
-            <p className="section-subtitle" style={{ maxWidth: '720px', margin: '0.75rem auto 0' }}>
-              Configura tu alcance operativo, presupuesto en COP y sistema preferido para identificar la referencia exacta de nuestro catálogo 2026.
+            <p className="section-subtitle" style={{ maxWidth: '700px', margin: '0.75rem auto 0' }}>
+              Completa estos 5 pasos rápidos para guardar tu proyecto, descubrir tu máquina ideal y recibir tu cotización personalizada en WhatsApp.
             </p>
           </div>
 
           <div className="calc-container">
-            {/* Form Column */}
-            <div className="calc-form reveal-left maq-reveal">
+            {/* Multi-Step Wizard Column */}
+            <div className="calc-form calc-wizard-card reveal-left maq-reveal">
               <div className="calc-form-header">
                 <div>
-                  <span className="calc-form-subheading">Configurador paso a paso</span>
+                  <span className="calc-form-subheading">
+                    Paso {wizardStep} de 6 · {WIZARD_STEPS[wizardStep - 1]?.title}
+                  </span>
                   <h3 className="calc-form-main-title">Parámetros de tu Proyecto</h3>
                 </div>
                 <div className="calc-progress-pill">
-                  <Sparkles size={14} /> Catálogo Oficial 2026
+                  <Sparkles size={14} />
+                  {leadRecord ? 'Guardado en CMS Activo' : 'Catálogo Oficial 2026'}
                 </div>
               </div>
 
-              {/* Question 1: Scale Target */}
-              <div className="calc-group">
-                <div className="calc-group-header">
-                  <div className="calc-step-num">01</div>
-                  <div>
-                    <label className="calc-label">
-                      ¿Qué nivel de producción o línea buscas?
-                    </label>
-                    <span className="calc-label-hint">Selecciona el alcance de fabricación de bloques</span>
-                  </div>
-                </div>
-                <div className="calc-options-grid">
-                  {[
-                    { id: 'artesanal-manual', label: 'Artesanal Compacta', tag: 'Fichas 01–02', sub: 'Iniciación y obra local' },
-                    { id: 'artesanal-ponedora', label: 'Ponedora Pequeña', tag: '4 bloques H10/ciclo', sub: 'Ficha 03 · Móvil' },
-                    { id: 'semiindustrial', label: 'Semiindustrial', tag: 'Fichas 04–05', sub: 'Fija o Ponedora Grande' },
-                    { id: 'hidraulica-compacta', label: 'Hidráulica Compacta', tag: 'Ficha 06', sub: 'Prensado Hidráulico' },
-                    { id: 'hidraulica-industrial', label: 'Industrial / PLC', tag: '4.000 a 7.000/día', sub: 'Fichas 07–08' }
-                  ].map(opt => {
-                    const isSelected = scaleTarget === opt.id;
-                    return (
-                      <button
-                        key={opt.id}
-                        type="button"
-                        className={`calc-option-card ${isSelected ? 'active' : ''}`}
-                        onClick={() => setScaleTarget(opt.id)}
-                      >
-                        <div className="calc-opt-top">
-                          <span className="calc-opt-val">{opt.label}</span>
-                          {isSelected && <span className="calc-opt-check"><Check size={12} /></span>}
-                        </div>
-                        <span className="calc-opt-tag">{opt.tag}</span>
-                        <span className="calc-opt-sub">{opt.sub}</span>
-                      </button>
-                    );
-                  })}
-                </div>
+              {/* 6-Step Progress Bar */}
+              <div className="calc-wizard-stepper" role="tablist" aria-label="Pasos del configurador">
+                {WIZARD_STEPS.map(s => {
+                  const isActive = wizardStep === s.step;
+                  const isDone = wizardStep > s.step;
+                  const canJump = s.step === 1 || Boolean(leadRecord);
+                  return (
+                    <button
+                      key={s.step}
+                      type="button"
+                      className={`calc-wizard-step-dot ${isActive ? 'active' : ''} ${isDone ? 'done' : ''}`}
+                      onClick={() => {
+                        if (canJump && s.step < 6) setWizardStep(s.step);
+                      }}
+                      disabled={!canJump || s.step === 6}
+                    >
+                      <span className="calc-wizard-step-num">
+                        {isDone ? <Check size={12} /> : `0${s.step}`}
+                      </span>
+                      <span className="calc-wizard-step-lbl">{s.short}</span>
+                    </button>
+                  );
+                })}
               </div>
 
-              {/* Question 2: Budget Range in COP */}
-              <div className="calc-group">
-                <div className="calc-group-header">
-                  <div className="calc-step-num">02</div>
-                  <div>
-                    <label className="calc-label">
-                      ¿Cuál es tu rango de inversión estimado (COP)?
-                    </label>
-                    <span className="calc-label-hint">Valores de referencia comercial en pesos colombianos</span>
+              {/* ── PASO 1: DATOS DE CONTACTO (SE GUARDA DESDE EL PASO 1 EN CMS) ── */}
+              {wizardStep === 1 && (
+                <form className="calc-step-panel" onSubmit={handleStep1Submit}>
+                  <div className="calc-group-header">
+                    <div className="calc-step-num">01</div>
+                    <div>
+                      <label className="calc-label">Tus datos de contacto</label>
+                      <span className="calc-label-hint">
+                        Guardamos tu solicitud desde este primer paso para enviarte la cotización técnica.
+                      </span>
+                    </div>
                   </div>
-                </div>
-                <div className="calc-options-grid">
-                  {[
-                    { id: '1m-3m', label: '$1.3M a $2.1M', tag: 'Entrada COP', sub: 'Manuales compactas' },
-                    { id: '8m-22m', label: '$8.3M a $22M', tag: 'Intermedio COP', sub: 'Ponedoras y fijas' },
-                    { id: '28m-66m', label: '$28M a $65.8M', tag: 'Hidráulica Compacta', sub: 'Base o línea equipada' },
-                    { id: '88m-130m', label: '$88M a $130M', tag: 'Industrial Base', sub: 'Hidráulica / PLC' },
-                    { id: '130m-190m', label: '$130M a $190M', tag: 'Planta Equipada', sub: 'Con mezcladora y banda' }
-                  ].map(opt => {
-                    const isSelected = budgetRange === opt.id;
-                    return (
-                      <button
-                        key={opt.id}
-                        type="button"
-                        className={`calc-option-card ${isSelected ? 'active' : ''}`}
-                        onClick={() => setBudgetRange(opt.id)}
-                      >
-                        <div className="calc-opt-top">
-                          <span className="calc-opt-val">{opt.label}</span>
-                          {isSelected && <span className="calc-opt-check"><Check size={12} /></span>}
-                        </div>
-                        <span className="calc-opt-tag">{opt.tag}</span>
-                        <span className="calc-opt-sub">{opt.sub}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
 
-              {/* Question 3: Operation Type */}
-              <div className="calc-group">
-                <div className="calc-group-header">
-                  <div className="calc-step-num">03</div>
-                  <div>
-                    <label className="calc-label">
-                      ¿Qué tipo de operación técnica prefieres?
-                    </label>
-                    <span className="calc-label-hint">Sistema de moldeo y control del equipo</span>
+                  {step1Error && <div className="calc-step-error">{step1Error}</div>}
+
+                  <div className="calc-contact-grid">
+                    <div className="calc-field calc-field-full">
+                      <label htmlFor="wiz-nombre">
+                        <User size={14} /> Nombre completo *
+                      </label>
+                      <input
+                        id="wiz-nombre"
+                        type="text"
+                        required
+                        placeholder="Ej. Carlos Andrés Ramírez"
+                        value={contactForm.nombre}
+                        onChange={e => setContactForm(prev => ({ ...prev, nombre: e.target.value }))}
+                      />
+                    </div>
+
+                    <div className="calc-field">
+                      <label htmlFor="wiz-telefono">
+                        <Phone size={14} /> Teléfono / WhatsApp *
+                      </label>
+                      <input
+                        id="wiz-telefono"
+                        type="tel"
+                        required
+                        placeholder="Ej. +57 310 000 0000"
+                        value={contactForm.telefono}
+                        onChange={e => setContactForm(prev => ({ ...prev, telefono: e.target.value }))}
+                      />
+                    </div>
+
+                    <div className="calc-field">
+                      <label htmlFor="wiz-correo">
+                        <Mail size={14} /> Correo electrónico *
+                      </label>
+                      <input
+                        id="wiz-correo"
+                        type="email"
+                        required
+                        placeholder="Ej. gerencia@constructora.com"
+                        value={contactForm.correo}
+                        onChange={e => setContactForm(prev => ({ ...prev, correo: e.target.value }))}
+                      />
+                    </div>
+
+                    <div className="calc-field">
+                      <label htmlFor="wiz-ciudad">
+                        <MapPin size={14} /> Ciudad *
+                      </label>
+                      <input
+                        id="wiz-ciudad"
+                        type="text"
+                        required
+                        placeholder="Ej. Florencia / Bogotá / Medellín"
+                        value={contactForm.ciudad}
+                        onChange={e => setContactForm(prev => ({ ...prev, ciudad: e.target.value }))}
+                      />
+                    </div>
+
+                    <div className="calc-field">
+                      <label htmlFor="wiz-pais">
+                        <Globe size={14} /> País *
+                      </label>
+                      <input
+                        id="wiz-pais"
+                        type="text"
+                        required
+                        placeholder="Ej. Colombia"
+                        value={contactForm.pais}
+                        onChange={e => setContactForm(prev => ({ ...prev, pais: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="calc-wizard-nav">
+                    <span className="calc-cms-note">
+                      <ShieldCheck size={15} /> Tus datos se registran de forma segura en nuestro CMS.
+                    </span>
+                    <button
+                      type="submit"
+                      className="btn btn-primary calc-next-btn"
+                      disabled={savingCms}
+                    >
+                      {savingCms ? 'Guardando en CMS...' : 'Guardar y Continuar al Paso 2'} <ArrowRight size={16} />
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {/* ── PASO 2: ¿CUÁNTOS LADRILLOS BUSCAS HACER POR DÍA? ── */}
+              {wizardStep === 2 && (
+                <div className="calc-step-panel">
+                  <div className="calc-group-header">
+                    <div className="calc-step-num">02</div>
+                    <div>
+                      <label className="calc-label">
+                        ¿Cuántos ladrillos o bloques buscas hacer por día?
+                      </label>
+                      <span className="calc-label-hint">
+                        Elige el volumen diario estimado para tu jornada de producción.
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="calc-wizard-cards">
+                    {DAILY_BRICKS_OPTIONS.map(opt => {
+                      const isSelected = dailyBricks === opt.id;
+                      return (
+                        <button
+                          key={opt.id}
+                          type="button"
+                          className={`calc-option-card calc-option-wide ${isSelected ? 'active' : ''}`}
+                          onClick={() => setDailyBricks(opt.id)}
+                        >
+                          <div className="calc-opt-top">
+                            <span className="calc-opt-val">{opt.label}</span>
+                            {isSelected && (
+                              <span className="calc-opt-check">
+                                <Check size={12} />
+                              </span>
+                            )}
+                          </div>
+                          <span className="calc-opt-tag">{opt.tag}</span>
+                          <span className="calc-opt-sub">{opt.sub}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="calc-wizard-nav">
+                    <button
+                      type="button"
+                      className="btn btn-outline calc-prev-btn"
+                      onClick={() => setWizardStep(1)}
+                    >
+                      <ArrowLeft size={16} /> Paso Anterior
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-primary calc-next-btn"
+                      onClick={() => setWizardStep(3)}
+                    >
+                      Siguiente: Nivel de Producción <ArrowRight size={16} />
+                    </button>
                   </div>
                 </div>
-                <div className="calc-options-grid">
-                  {[
-                    { id: 'manual-compacta', label: 'Manual Pura', tag: 'Sin motor', sub: 'Accionamiento manual' },
-                    { id: 'manual-vibracion', label: 'Motovibración', tag: '280 W · 110 V', sub: 'Compacta o estacionaria' },
-                    { id: 'ponedora-movil', label: 'Ponedora Móvil', tag: 'Sin tablas', sub: 'Descarga sobre piso' },
-                    { id: 'hidraulica-manual', label: 'Mandos Hidráulicos', tag: 'Palancas', sub: 'Alta presión sin PLC' },
-                    { id: 'plc-automatica', label: 'Automática PLC', tag: 'Kinco + HMI 7”', sub: 'Secuencia automatizada' }
-                  ].map(opt => {
-                    const isSelected = operationMode === opt.id;
-                    return (
-                      <button
-                        key={opt.id}
-                        type="button"
-                        className={`calc-option-card ${isSelected ? 'active' : ''}`}
-                        onClick={() => setOperationMode(opt.id)}
-                      >
-                        <div className="calc-opt-top">
-                          <span className="calc-opt-val">{opt.label}</span>
-                          {isSelected && <span className="calc-opt-check"><Check size={12} /></span>}
-                        </div>
-                        <span className="calc-opt-tag">{opt.tag}</span>
-                        <span className="calc-opt-sub">{opt.sub}</span>
-                      </button>
-                    );
-                  })}
+              )}
+
+              {/* ── PASO 3: ¿QUÉ NIVEL DE PRODUCCIÓN BUSCAS? ── */}
+              {wizardStep === 3 && (
+                <div className="calc-step-panel">
+                  <div className="calc-group-header">
+                    <div className="calc-step-num">03</div>
+                    <div>
+                      <label className="calc-label">
+                        ¿Qué nivel de producción o línea buscas?
+                      </label>
+                      <span className="calc-label-hint">
+                        Selecciona el sistema operativo que mejor se adapta a tu planta.
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="calc-wizard-cards">
+                    {PROD_LEVEL_OPTIONS.map(opt => {
+                      const isSelected = prodLevel === opt.id;
+                      return (
+                        <button
+                          key={opt.id}
+                          type="button"
+                          className={`calc-option-card calc-option-wide ${isSelected ? 'active' : ''}`}
+                          onClick={() => setProdLevel(opt.id)}
+                        >
+                          <div className="calc-opt-top">
+                            <span className="calc-opt-val">{opt.label}</span>
+                            {isSelected && (
+                              <span className="calc-opt-check">
+                                <Check size={12} />
+                              </span>
+                            )}
+                          </div>
+                          <span className="calc-opt-tag">{opt.tag}</span>
+                          <span className="calc-opt-sub">{opt.sub}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="calc-wizard-nav">
+                    <button
+                      type="button"
+                      className="btn btn-outline calc-prev-btn"
+                      onClick={() => setWizardStep(2)}
+                    >
+                      <ArrowLeft size={16} /> Paso Anterior
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-primary calc-next-btn"
+                      onClick={() => setWizardStep(4)}
+                    >
+                      Siguiente: Presupuesto <ArrowRight size={16} />
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* ── PASO 4: ¿QUÉ PRESUPUESTO TIENES? (BARRA INTERACTIVA) ── */}
+              {wizardStep === 4 && (
+                <div className="calc-step-panel">
+                  <div className="calc-group-header">
+                    <div className="calc-step-num">04</div>
+                    <div>
+                      <label className="calc-label">
+                        ¿Cuál es tu presupuesto estimado de inversión?
+                      </label>
+                      <span className="calc-label-hint">
+                        Desliza la barra o toca un valor de referencia en pesos colombianos (COP).
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="calc-budget-slider-box">
+                    <div className="calc-budget-display">
+                      <span className="calc-budget-caption">
+                        <Sliders size={14} /> Presupuesto Seleccionado
+                      </span>
+                      <strong className="calc-budget-amount">{formattedBudget}</strong>
+                      <span className="calc-budget-tier">
+                        {budgetCOP <= 3000000
+                          ? 'Rango Línea Artesanal Compacta ($1.3M – $2.1M)'
+                          : budgetCOP <= 25000000
+                          ? 'Rango Ponedoras y Semiindustrial ($8.3M – $22M)'
+                          : budgetCOP <= 70000000
+                          ? 'Rango Hidráulica Compacta Base o Equipada ($28M – $65.8M)'
+                          : budgetCOP <= 135000000
+                          ? 'Rango Hidráulica Industrial / PLC Base ($88M – $129.8M)'
+                          : 'Rango Planta Industrial / PLC Línea Equipada ($130M – $189.8M)'}
+                      </span>
+                    </div>
+
+                    <div className="calc-range-wrap">
+                      <input
+                        id="wiz-budget-range"
+                        type="range"
+                        min={1300000}
+                        max={190000000}
+                        step={500000}
+                        value={budgetCOP}
+                        onChange={e => setBudgetCOP(Number(e.target.value))}
+                        className="calc-budget-range-input"
+                      />
+                      <div className="calc-range-minmax">
+                        <span>$1.300.000 COP</span>
+                        <span>$190.000.000 COP</span>
+                      </div>
+                    </div>
+
+                    <div className="calc-budget-presets">
+                      {BUDGET_PRESETS.map(p => (
+                        <button
+                          key={p.val}
+                          type="button"
+                          className={`calc-budget-chip ${Math.abs(budgetCOP - p.val) < 600000 ? 'active' : ''}`}
+                          onClick={() => setBudgetCOP(p.val)}
+                        >
+                          {p.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="calc-wizard-nav">
+                    <button
+                      type="button"
+                      className="btn btn-outline calc-prev-btn"
+                      onClick={() => setWizardStep(3)}
+                    >
+                      <ArrowLeft size={16} /> Paso Anterior
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-primary calc-next-btn"
+                      onClick={() => setWizardStep(5)}
+                    >
+                      Siguiente: Tipo de Ladrillo <ArrowRight size={16} />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* ── PASO 5: ¿QUÉ TIPO DE LADRILLO TE INTERESA HACER? ── */}
+              {wizardStep === 5 && (
+                <div className="calc-step-panel">
+                  <div className="calc-group-header">
+                    <div className="calc-step-num">05</div>
+                    <div>
+                      <label className="calc-label">
+                        ¿Qué tipo de ladrillo o bloque te interesa fabricar?
+                      </label>
+                      <span className="calc-label-hint">
+                        Elige el formato principal para configurar los moldes de tu máquina.
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="calc-wizard-cards">
+                    {BRICK_TYPE_OPTIONS.map(opt => {
+                      const isSelected = brickType === opt.id;
+                      return (
+                        <button
+                          key={opt.id}
+                          type="button"
+                          className={`calc-option-card calc-option-wide ${isSelected ? 'active' : ''}`}
+                          onClick={() => setBrickType(opt.id)}
+                        >
+                          <div className="calc-opt-top">
+                            <span className="calc-opt-val">{opt.label}</span>
+                            {isSelected && (
+                              <span className="calc-opt-check">
+                                <Check size={12} />
+                              </span>
+                            )}
+                          </div>
+                          <span className="calc-opt-tag">{opt.tag}</span>
+                          <span className="calc-opt-sub">{opt.sub}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="calc-wizard-nav">
+                    <button
+                      type="button"
+                      className="btn btn-outline calc-prev-btn"
+                      onClick={() => setWizardStep(4)}
+                    >
+                      <ArrowLeft size={16} /> Paso Anterior
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-primary calc-finish-btn"
+                      onClick={handleFinishWizard}
+                      disabled={savingCms}
+                    >
+                      {savingCms ? 'Actualizando en CMS...' : 'Finalizar y Guardar Configuración'} <CheckCircle2 size={17} />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* ── PASO 6: ¡ENVIADO CON ÉXITO! + BOTÓN COTIZACIÓN A WHATSAPP CON LA INFO ── */}
+              {wizardStep === 6 && (
+                <div className="calc-step-panel calc-step-success">
+                  <div className="calc-success-banner">
+                    <div className="calc-success-icon">
+                      <CheckCircle2 size={32} />
+                    </div>
+                    <div>
+                      <span className="calc-success-badge">
+                        Paso 6 de 6 · Registro Actualizado en CMS
+                      </span>
+                      <h4 className="calc-success-title">
+                        ¡Enviado con éxito{contactForm.nombre ? `, ${contactForm.nombre}` : ''}!
+                      </h4>
+                      <p className="calc-success-desc">
+                        Hemos guardado tus datos y actualizado tu perfil de proyecto con la máquina ideal recomendada para tu operación.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="calc-summary-grid">
+                    <div className="calc-summary-item">
+                      <small>Cliente y Ubicación</small>
+                      <strong>
+                        {contactForm.nombre || 'Cliente Maqte'} · {contactForm.ciudad}, {contactForm.pais}
+                      </strong>
+                      <span>
+                        {contactForm.telefono} · {contactForm.correo}
+                      </span>
+                    </div>
+                    <div className="calc-summary-item">
+                      <small>Producción Diaria Buscada</small>
+                      <strong>{selectedDailyLabel}</strong>
+                    </div>
+                    <div className="calc-summary-item">
+                      <small>Nivel de Producción</small>
+                      <strong>{selectedLevelLabel}</strong>
+                    </div>
+                    <div className="calc-summary-item">
+                      <small>Presupuesto Estimado</small>
+                      <strong>{formattedBudget}</strong>
+                    </div>
+                    <div className="calc-summary-item">
+                      <small>Tipo de Ladrillo / Bloque</small>
+                      <strong>{selectedBrickLabel}</strong>
+                    </div>
+                    <div className="calc-summary-item highlight">
+                      <small>Máquina Recomendada</small>
+                      <strong>
+                        Ficha {recommendedMachine.code} — {recommendedMachine.name}
+                      </strong>
+                      <span>{recommendedMachine.price}</span>
+                    </div>
+                  </div>
+
+                  <div className="calc-success-actions">
+                    <a
+                      href={dynamicWhatsappUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="btn btn-primary calc-wa-final-btn"
+                    >
+                      <MessageCircle size={19} /> Enviar Cotización a WhatsApp con toda mi Info <ArrowRight size={17} />
+                    </a>
+
+                    <div className="calc-success-secondary-row">
+                      <Link
+                        to={`/maquinas/${recommendedMachine.id}`}
+                        className="btn btn-outline"
+                      >
+                        <Eye size={16} /> Ver Página de Ficha #{recommendedMachine.code}
+                      </Link>
+                      <button
+                        type="button"
+                        className="btn btn-outline calc-reset-btn"
+                        onClick={handleResetWizard}
+                      >
+                        <RotateCcw size={15} /> Hacer otra consulta
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Recommendation Result Column */}
@@ -718,12 +1424,19 @@ export default function Maquinas() {
                     <MessageCircle size={18} /> Cotizar Ficha {recommendedMachine.code} por WhatsApp <ArrowRight size={16} />
                   </a>
 
+                  <Link
+                    to={`/maquinas/${recommendedMachine.id}`}
+                    className="btn btn-outline calc-scroll-btn"
+                  >
+                    <Eye size={16} /> Ver Página Completa de Ficha #{recommendedMachine.code} <ArrowRight size={15} />
+                  </Link>
+
                   <button
                     type="button"
                     className="btn btn-outline calc-scroll-btn"
                     onClick={() => scrollToFicha(recommendedMachine.code)}
                   >
-                    Ir a la Ficha Técnica #{recommendedMachine.code} <ChevronDown size={16} />
+                    Ir a la Ficha en esta página <ChevronDown size={16} />
                   </button>
                 </div>
               </div>
@@ -731,6 +1444,9 @@ export default function Maquinas() {
           </div>
         </div>
       </section>
+
+      {/* ─── CARRUSEL DE MAQUINARIA Y PÁGINAS DE PRODUCTO ─── */}
+      <MaquinasCarousel />
 
       {/* ─── CONDICIONES COMERCIALES PARA COTIZAR (DEL CATÁLOGO OFICIAL) ─── */}
       <section className="section-pad catalog-conditions-section">

@@ -14,6 +14,7 @@ import { products, collections } from "@wix/stores";
 import { currentCart } from "@wix/ecom";
 import { redirects } from "@wix/redirects";
 import { members, badges } from "@wix/members";
+import { items } from "@wix/data";
 
 const WIX_CLIENT_ID = import.meta.env.VITE_WIX_CLIENT_ID || "";
 const TOKEN_KEY = "maqte_wix_session";
@@ -59,6 +60,7 @@ export function createWixClient() {
       redirects,
       members,
       badges,
+      items,
     },
     auth: OAuthStrategy({
       clientId: WIX_CLIENT_ID,

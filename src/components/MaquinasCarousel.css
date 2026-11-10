@@ -1,0 +1,392 @@
+/* ═══════════════════════════════════════════════════════════════════
+   CARRUSEL DE MAQUINARIA 2026 (Comprar · Cotizar · Ver detalles)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.mq-carousel-section {
+  padding: 4.5rem 0;
+  background: linear-gradient(180deg, #F8FAFC 0%, #EFF3F8 100%);
+  border-top: 1px solid #E2E8F0;
+}
+
+.mq-carousel-top {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.mq-carousel-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(247, 188, 33, 0.16);
+  border: 1px solid rgba(217, 119, 6, 0.3);
+  color: #B45309;
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.65rem;
+}
+
+.mq-carousel-title {
+  font-size: clamp(1.65rem, 2.8vw, 2.25rem);
+  font-weight: 900;
+  color: #0F172A;
+  margin: 0 0 0.45rem;
+  letter-spacing: -0.02em;
+}
+
+.mq-carousel-title span {
+  color: #D97706;
+}
+
+.mq-carousel-sub {
+  font-size: 0.94rem;
+  color: #475569;
+  margin: 0;
+  max-width: 620px;
+  line-height: 1.55;
+}
+
+.mq-carousel-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.mq-carousel-pills {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.mq-carousel-pill {
+  padding: 0.48rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid #CBD5E1;
+  background: #FFFFFF;
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 750;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.mq-carousel-pill:hover {
+  border-color: #94A3B8;
+}
+
+.mq-carousel-pill.active {
+  background: #121721;
+  border-color: #121721;
+  color: #F7BC21;
+}
+
+.mq-carousel-arrows {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.mq-carousel-arrow {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid #CBD5E1;
+  background: #FFFFFF;
+  color: #0F172A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.mq-carousel-arrow:hover {
+  background: #F7BC21;
+  border-color: #F7BC21;
+  color: #111827;
+}
+
+/* Horizontal Scroll Track */
+.mq-carousel-track {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: calc(33.333% - 14px);
+  gap: 20px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: 0.5rem 0.2rem 1.25rem;
+  scrollbar-width: thin;
+  scrollbar-color: #CBD5E1 transparent;
+}
+
+.mq-carousel-track::-webkit-scrollbar {
+  height: 7px;
+}
+
+.mq-carousel-track::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 999px;
+}
+
+.mq-carousel-card {
+  scroll-snap-align: start;
+  background: #FFFFFF;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 18px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+}
+
+.mq-carousel-card:hover {
+  transform: translateY(-4px);
+  border-color: #F7BC21;
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.1);
+}
+
+.mq-carousel-img-wrap {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background: #F1F5F9;
+  overflow: hidden;
+  display: block;
+}
+
+.mq-carousel-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.35s ease;
+}
+
+.mq-carousel-card:hover .mq-carousel-img-wrap img {
+  transform: scale(1.04);
+}
+
+.mq-carousel-badges {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.mq-carousel-code {
+  background: #111827;
+  color: #F7BC21;
+  font-size: 0.7rem;
+  font-weight: 900;
+  padding: 0.28rem 0.65rem;
+  border-radius: 999px;
+  letter-spacing: 0.05em;
+}
+
+.mq-carousel-line {
+  background: rgba(15, 23, 42, 0.82);
+  backdrop-filter: blur(6px);
+  color: #FFFFFF;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.28rem 0.65rem;
+  border-radius: 999px;
+}
+
+.mq-carousel-img-hover {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+
+.mq-carousel-img-hover span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #F7BC21;
+  color: #111827;
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 850;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+.mq-carousel-card:hover .mq-carousel-img-hover {
+  opacity: 1;
+}
+
+.mq-carousel-body {
+  padding: 1.25rem 1.3rem 1.35rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.mq-carousel-name-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.mq-carousel-name {
+  font-size: 1.05rem;
+  font-weight: 850;
+  color: #0F172A;
+  margin: 0 0 0.4rem;
+  line-height: 1.3;
+}
+
+.mq-carousel-name-link:hover .mq-carousel-name {
+  color: #D97706;
+}
+
+.mq-carousel-desc {
+  font-size: 0.82rem;
+  color: #64748B;
+  line-height: 1.48;
+  margin: 0 0 1rem;
+  flex: 1;
+}
+
+.mq-carousel-price-box {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 0.75rem 0.9rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.mq-carousel-price-lbl {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #64748B;
+  letter-spacing: 0.04em;
+}
+
+.mq-carousel-price-val {
+  display: block;
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: #0F172A;
+}
+
+.mq-carousel-price-old {
+  font-size: 0.74rem;
+  color: #EF4444;
+  font-weight: 700;
+}
+
+.mq-carousel-equipped-pill {
+  background: #FFFBEB;
+  border: 1px solid #FDE68A;
+  border-radius: 8px;
+  padding: 0.35rem 0.6rem;
+  text-align: right;
+}
+
+.mq-carousel-equipped-pill span {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #B45309;
+  text-transform: uppercase;
+}
+
+.mq-carousel-equipped-pill strong {
+  font-size: 0.78rem;
+  font-weight: 850;
+  color: #92400E;
+}
+
+/* 3 Action Buttons: Comprar, Cotizar, Ver detalles */
+.mq-carousel-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.mq-c-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.38rem;
+  padding: 0.62rem 0.75rem;
+  border-radius: 10px;
+  font-size: 0.79rem;
+  font-weight: 800;
+  text-decoration: none;
+  transition: all 0.18s ease;
+  cursor: pointer;
+}
+
+.mq-c-btn-buy {
+  background: #F7BC21;
+  color: #111827;
+  border: 1px solid #F7BC21;
+}
+
+.mq-c-btn-buy:hover {
+  background: #E5AB12;
+  transform: translateY(-1px);
+}
+
+.mq-c-btn-quote {
+  background: #121721;
+  color: #FFFFFF;
+  border: 1px solid #121721;
+}
+
+.mq-c-btn-quote:hover {
+  background: #1E293B;
+  transform: translateY(-1px);
+}
+
+.mq-c-btn-details {
+  grid-column: 1 / -1;
+  background: #FFFFFF;
+  color: #0F172A;
+  border: 1.5px solid #CBD5E1;
+}
+
+.mq-c-btn-details:hover {
+  border-color: #0F172A;
+  background: #F8FAFC;
+}
+
+@media (max-width: 1040px) {
+  .mq-carousel-track {
+    grid-auto-columns: calc(50% - 10px);
+  }
+}
+
+@media (max-width: 640px) {
+  .mq-carousel-track {
+    grid-auto-columns: 88%;
+  }
+}
+

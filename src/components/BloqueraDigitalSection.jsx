@@ -3,18 +3,73 @@ import {
   Calculator, ClipboardList, GraduationCap, HelpCircle,
   SlidersHorizontal, Copy, Check, Printer, MessageCircle,
   RotateCcw, AlertTriangle, PlusCircle, Download, Trash2,
-  TrendingUp, Package, DollarSign, Layers, BookOpen, ShieldAlert
+  TrendingUp, Package, DollarSign, Layers, BookOpen, ShieldAlert,
+  Info, X
 } from 'lucide-react';
 import { BRAND } from '../data/content';
 import './BloqueraDigitalSection.css';
 
 const STORAGE_KEY = 'maqtecolombia_bloquera_piloto_movimientos_v1';
 
+const BLOCK_GUIDE_META = {
+  title: 'GUÍA DE BLOQUES H10, H12, H15 Y H20',
+  subtitle: 'Descripciones oficiales para la calculadora Bloquera Digital · MAQTECOLOMBIA',
+  whatIsHTitle: '¿Qué significa la letra H?',
+  whatIsHText:
+    'En esta clasificación comercial, la letra H se utiliza para identificar el bloque según su ancho nominal. Así, H10 corresponde a 10 cm de ancho; H12, a 12 cm; H15, a 15 cm; y H20, a 20 cm. Esta denominación no indica por sí sola la resistencia del bloque ni determina si puede utilizarse en muros estructurales.',
+  calcWarning:
+    'Los costos son estimaciones. La dosificación, la resistencia y el uso estructural deben verificarse mediante ensayos y las normas técnicas aplicables.',
+  technicalNote:
+    'Nota técnica: las dimensiones aquí indicadas son las suministradas para el proyecto y deben cotejarse con los moldes y fichas técnicas reales de MAQTECOLOMBIA. Las medidas nominales pueden diferir de las reales según el fabricante y las juntas previstas.',
+  h10Footnote:
+    '*Medida H10 de referencia: el formato comercial frecuente es 20 cm de alto (también existen variantes de 40 cm de alto según molde específico).',
+};
+
 const BLOCK_GEOS = {
-  H10: { width: 10, voidRatio: 0.42, dim: '10 × 20 × 40 cm', tag: 'Muros divisorios' },
-  H12: { width: 12, voidRatio: 0.40, dim: '12 × 20 × 40 cm', tag: 'Mampostería liviana' },
-  H15: { width: 15, voidRatio: 0.38, dim: '15 × 20 × 40 cm', tag: 'Estructural estándar' },
-  H20: { width: 20, voidRatio: 0.35, dim: '20 × 20 × 40 cm', tag: 'Alta carga estructural' },
+  H10: {
+    width: 10,
+    altoCm: '20 cm (o 40 cm*)',
+    largoCm: '40 cm',
+    voidRatio: 0.42,
+    dim: '10 × 20 × 40 cm',
+    dimGuide: '10 cm de ancho × 20 cm de alto × 40 cm de largo',
+    tag: 'Divisiones interiores y cerramientos livianos',
+    guideDesc:
+      'Es un bloque relativamente angosto, utilizado habitualmente para divisiones interiores y cerramientos livianos, siempre que el diseño del proyecto lo permita. Su menor ancho facilita aprovechar el espacio, pero no debe asumirse que es apto para soportar cargas.',
+  },
+  H12: {
+    width: 12,
+    altoCm: '20 cm',
+    largoCm: '40 cm',
+    voidRatio: 0.40,
+    dim: '12 × 20 × 40 cm',
+    dimGuide: '12 cm de ancho × 20 cm de alto × 40 cm de largo',
+    tag: 'Muros divisorios y cerramientos',
+    guideDesc:
+      'Ofrece un espesor intermedio para muros divisorios y determinados cerramientos. Su uso depende de los requisitos del proyecto, las condiciones de exposición y la resistencia comprobada del producto.',
+  },
+  H15: {
+    width: 15,
+    altoCm: '20 cm',
+    largoCm: '40 cm',
+    voidRatio: 0.38,
+    dim: '15 × 20 × 40 cm',
+    dimGuide: '15 cm de ancho × 20 cm de alto × 40 cm de largo',
+    tag: 'Cerramientos y mampostería especificada',
+    guideDesc:
+      'Por su mayor espesor, puede emplearse en cerramientos y en sistemas de mampostería especificados por un profesional. La aptitud estructural depende del diseño, la fabricación, los ensayos y la normativa aplicable.',
+  },
+  H20: {
+    width: 20,
+    altoCm: '20 cm',
+    largoCm: '40 cm',
+    voidRatio: 0.35,
+    dim: '20 × 20 × 40 cm',
+    dimGuide: '20 cm de ancho × 20 cm de alto × 40 cm de largo',
+    tag: 'Muros de mayor espesor según diseño',
+    guideDesc:
+      'Es el de mayor ancho de esta selección. Puede considerarse para muros que requieran mayor espesor, de acuerdo con los planos y especificaciones. Su ancho no equivale automáticamente a mayor resistencia certificada.',
+  },
 };
 
 const MIX_DOSAGES = {
@@ -119,6 +174,13 @@ export default function BloqueraDigitalSection({
   const [params, setParams] = useState(DEFAULT_PARAMS);
   const [showAdvancedParams, setShowAdvancedParams] = useState(false);
   const [copiedSuccess, setCopiedSuccess] = useState(false);
+  const [guideModalOpen, setGuideModalOpen] = useState(false);
+  const [guideFocusBlock, setGuideFocusBlock] = useState('H10');
+
+  const openBlockGuide = (code = blockType) => {
+    setGuideFocusBlock(code || blockType);
+    setGuideModalOpen(true);
+  };
 
   // ── Management (Gestión) State ──
   const [records, setRecords] = useState(() => {
@@ -430,27 +492,86 @@ export default function BloqueraDigitalSection({
 
               {/* 1. Tipo de Bloque */}
               <div className="bdig-field-group">
-                <label className="bdig-group-label">1. Selecciona el Tipo de Bloque</label>
+                <div className="bdig-group-label-row">
+                  <label className="bdig-group-label" style={{ marginBottom: 0 }}>
+                    1. Selecciona el Tipo de Bloque
+                  </label>
+                  <button
+                    type="button"
+                    className="bdig-guide-open-btn"
+                    onClick={() => openBlockGuide(blockType)}
+                  >
+                    <Info size={14} />
+                    <span>Más info · Guía de Bloques H10–H20</span>
+                  </button>
+                </div>
+
                 <div className="bdig-block-selector">
                   {Object.entries(BLOCK_GEOS).map(([key, info]) => {
                     const active = blockType === key;
                     return (
-                      <button
+                      <div
                         key={key}
-                        type="button"
+                        role="button"
+                        tabIndex={0}
                         className={`bdig-block-pill ${active ? 'active' : ''}`}
                         onClick={() => setBlockType(key)}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            setBlockType(key);
+                          }
+                        }}
                       >
                         <div className="bdig-block-pill-top">
-                          <span className="bdig-block-code">{key}</span>
+                          <div className="bdig-block-title-wrap">
+                            <span className="bdig-block-code">{key}</span>
+                            <button
+                              type="button"
+                              className="bdig-block-info-chip"
+                              title={`Ver guía técnica del Bloque ${key}`}
+                              onClick={e => {
+                                e.stopPropagation();
+                                setBlockType(key);
+                                openBlockGuide(key);
+                              }}
+                            >
+                              <Info size={12} /> Más info
+                            </button>
+                          </div>
                           {active && <Check size={14} className="bdig-check" />}
                         </div>
                         <span className="bdig-block-dim">{info.dim}</span>
                         <span className="bdig-block-tag">{info.tag}</span>
-                      </button>
+                      </div>
                     );
                   })}
                 </div>
+
+                {/* Ficha orientativa en vivo del bloque elegido (según Guia_Bloques_MAQTECOLOMBIA_NUEVO.docx) */}
+                {BLOCK_GEOS[blockType] && (
+                  <div className="bdig-selected-block-guide">
+                    <div className="bdig-sbg-top">
+                      <div>
+                        <span className="bdig-sbg-badge">Bloque {blockType}</span>
+                        <strong className="bdig-sbg-dims">
+                          Dimensiones: {BLOCK_GEOS[blockType].dimGuide}
+                        </strong>
+                      </div>
+                      <button
+                        type="button"
+                        className="bdig-sbg-link"
+                        onClick={() => openBlockGuide(blockType)}
+                      >
+                        <BookOpen size={13} /> Ver tabla comparativa H10–H20
+                      </button>
+                    </div>
+                    <p className="bdig-sbg-desc">{BLOCK_GEOS[blockType].guideDesc}</p>
+                    <small className="bdig-sbg-warn">
+                      <AlertTriangle size={13} /> {BLOCK_GUIDE_META.calcWarning}
+                    </small>
+                  </div>
+                )}
               </div>
 
               {/* 2. Dosificación */}
@@ -1005,6 +1126,188 @@ export default function BloqueraDigitalSection({
                 <p>
                   <strong>Importante:</strong> Los resultados son estimaciones económicas y deben contrastarse con los costos reales y ensayos de laboratorio de tu operación. Los registros de gestión se almacenan localmente en este navegador; utiliza siempre <strong>Exportar CSV</strong> para conservar tu respaldo.
                 </p>
+              </div>
+
+              {/* Guía Oficial de Bloques H10, H12, H15 y H20 integrada en Guía de Uso */}
+              <div className="bdig-guide-blocks-panel" style={{ marginTop: '2rem' }}>
+                <span className="bdig-step-tag">Referencia Técnica MAQTECOLOMBIA</span>
+                <h3 className="bdig-card-title">{BLOCK_GUIDE_META.title}</h3>
+                <p className="bdig-form-note" style={{ marginBottom: '1rem' }}>
+                  <strong>{BLOCK_GUIDE_META.whatIsHTitle}</strong> {BLOCK_GUIDE_META.whatIsHText}
+                </p>
+
+                <div className="bdig-table-wrap" style={{ marginBottom: '1.25rem' }}>
+                  <table className="bdig-records-table">
+                    <thead>
+                      <tr>
+                        <th>Tipo</th>
+                        <th>Ancho</th>
+                        <th>Alto</th>
+                        <th>Largo</th>
+                        <th>Uso Orientativo</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {Object.entries(BLOCK_GEOS).map(([code, b]) => (
+                        <tr key={code}>
+                          <td>
+                            <strong>Bloque {code}</strong>
+                          </td>
+                          <td>{b.width} cm</td>
+                          <td>{b.altoCm}</td>
+                          <td>{b.largoCm}</td>
+                          <td>{b.guideDesc}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <small style={{ display: 'block', color: '#64748B', fontSize: '0.8rem', lineHeight: 1.55 }}>
+                  {BLOCK_GUIDE_META.h10Footnote}
+                  <br />
+                  {BLOCK_GUIDE_META.technicalNote}
+                </small>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ─── MODAL INTERACTIVO: GUÍA DE BLOQUES H10, H12, H15 Y H20 ─── */}
+        {guideModalOpen && (
+          <div
+            className="bdig-guide-modal-backdrop"
+            onClick={() => setGuideModalOpen(false)}
+          >
+            <div
+              className="bdig-guide-modal"
+              onClick={e => e.stopPropagation()}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Guía de Bloques H10, H12, H15 y H20"
+            >
+              <div className="bdig-guide-modal-header">
+                <div>
+                  <span className="bdig-step-tag">MAQTECOLOMBIA · Guía Técnica Oficial</span>
+                  <h3>{BLOCK_GUIDE_META.title}</h3>
+                  <p>{BLOCK_GUIDE_META.subtitle}</p>
+                </div>
+                <button
+                  type="button"
+                  className="bdig-guide-modal-close"
+                  onClick={() => setGuideModalOpen(false)}
+                  aria-label="Cerrar guía"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="bdig-guide-modal-body">
+                {/* ¿Qué significa la letra H? */}
+                <div className="bdig-guide-whatish">
+                  <h4>
+                    <Info size={16} /> {BLOCK_GUIDE_META.whatIsHTitle}
+                  </h4>
+                  <p>{BLOCK_GUIDE_META.whatIsHText}</p>
+                </div>
+
+                {/* Tabla de Dimensiones de Referencia */}
+                <div className="bdig-guide-table-section">
+                  <h4>Dimensiones de referencia</h4>
+                  <div className="bdig-table-wrap">
+                    <table className="bdig-records-table bdig-dims-table">
+                      <thead>
+                        <tr>
+                          <th>Tipo</th>
+                          <th>Ancho</th>
+                          <th>Alto</th>
+                          <th>Largo</th>
+                          <th style={{ textAlign: 'right' }}>Acción</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {Object.entries(BLOCK_GEOS).map(([code, b]) => {
+                          const isFocused = guideFocusBlock === code;
+                          return (
+                            <tr
+                              key={code}
+                              className={isFocused ? 'bdig-dims-row-active' : ''}
+                              onClick={() => setGuideFocusBlock(code)}
+                            >
+                              <td>
+                                <strong>{code}</strong>
+                              </td>
+                              <td>{b.width} cm</td>
+                              <td>{b.altoCm}</td>
+                              <td>{b.largoCm}</td>
+                              <td style={{ textAlign: 'right' }}>
+                                <button
+                                  type="button"
+                                  className="bdig-dims-select-btn"
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    setBlockType(code);
+                                    setGuideFocusBlock(code);
+                                  }}
+                                >
+                                  {blockType === code ? '✓ En uso' : `Usar ${code}`}
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                  <small className="bdig-guide-footnote">{BLOCK_GUIDE_META.h10Footnote}</small>
+                </div>
+
+                {/* Tarjetas descriptivas de Bloque H10, H12, H15 y H20 */}
+                <div className="bdig-guide-cards-grid">
+                  {Object.entries(BLOCK_GEOS).map(([code, b]) => {
+                    const isFocused = guideFocusBlock === code;
+                    const isSelected = blockType === code;
+                    return (
+                      <div
+                        key={code}
+                        className={`bdig-guide-block-card ${isFocused ? 'focused' : ''}`}
+                        onClick={() => setGuideFocusBlock(code)}
+                      >
+                        <div className="bdig-gbc-top">
+                          <div>
+                            <span className="bdig-gbc-badge">Bloque {code}</span>
+                            <h5>{b.tag}</h5>
+                          </div>
+                          <button
+                            type="button"
+                            className={`bdig-gbc-use-btn ${isSelected ? 'active' : ''}`}
+                            onClick={e => {
+                              e.stopPropagation();
+                              setBlockType(code);
+                              setGuideModalOpen(false);
+                            }}
+                          >
+                            {isSelected ? 'Seleccionado' : `Calcular con ${code}`}
+                          </button>
+                        </div>
+                        <span className="bdig-gbc-dims">
+                          Dimensiones: {b.dimGuide}
+                        </span>
+                        <p className="bdig-gbc-desc">{b.guideDesc}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Avisos técnicos oficiales */}
+                <div className="bdig-guide-modal-notices">
+                  <div className="bdig-disclaimer-box">
+                    <AlertTriangle size={18} className="bdig-disc-icon" />
+                    <p>
+                      <strong>Aviso de la calculadora:</strong> {BLOCK_GUIDE_META.calcWarning}
+                    </p>
+                  </div>
+                  <p className="bdig-guide-tech-note">{BLOCK_GUIDE_META.technicalNote}</p>
+                </div>
               </div>
             </div>
           </div>

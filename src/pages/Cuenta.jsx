@@ -1,47 +1,46 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   User, Lock, Unlock, ShieldCheck, LogIn, UserPlus, LogOut,
-  KeyRound, Calculator, ClipboardList, GraduationCap, HelpCircle,
-  CheckCircle2, AlertCircle, MessageCircle, Plus, Trash2,
-  Settings, Sparkles, ExternalLink, RefreshCw, ShieldAlert
+  Calculator, ClipboardList, GraduationCap, HelpCircle,
+  AlertCircle, MessageCircle, ExternalLink, RefreshCw, ShieldAlert,
+  Sparkles, Eye, PlayCircle
 } from 'lucide-react';
 import { LoginState } from '@wix/sdk';
 import { useWixClient } from '../hooks/useWixClient';
 import { BRAND } from '../data/content';
 import BloqueraDigitalSection from '../components/BloqueraDigitalSection';
+import BenefitSalesLanding from '../components/BenefitSalesLanding';
 import './Cuenta.css';
 
-const PERMS_STORAGE_KEY = 'maqte_wix_member_permissions_v1';
-const LOCAL_SESSION_KEY = 'maqte_portal_active_user_v1';
+const LOCAL_SESSION_KEY = 'maqte_portal_active_user_v2';
+const WIX_MEMBER_PERMS_COLLECTION =
+  import.meta.env.VITE_WIX_MEMBER_PERMS_COLLECTION || 'PermisosMiembros';
 
 export const ROLE_PRESETS = {
-  admin: {
-    id: 'admin',
-    label: 'Administrador Total',
-    badgeColor: '#F7BC21',
-    sections: { calc: true, gestion: true, curso: true, info: true, admin: true },
-    desc: 'Acceso completo a las 4 secciones de Bloquera Digital y al panel de control de permisos de usuarios.',
+  visitante: {
+    id: 'visitante',
+    label: 'Visitante (Sin registro)',
+    sections: { calc: true, gestion: false, curso: false, info: true },
   },
-  pro: {
-    id: 'pro',
-    label: 'Cliente Bloquera Pro',
-    badgeColor: '#10B981',
-    sections: { calc: true, gestion: true, curso: true, info: true, admin: false },
-    desc: 'Acceso habilitado a Calculadora de Costos, Gestión de Bloquera (CSV), Centro de Formación y Guía.',
+  registrado_basico: {
+    id: 'registrado_basico',
+    label: 'Miembro Registrado (Permiso Básico)',
+    sections: { calc: true, gestion: false, curso: false, info: true },
   },
   operador: {
     id: 'operador',
-    label: 'Operador de Planta',
-    badgeColor: '#3B82F6',
-    sections: { calc: true, gestion: true, curso: false, info: true, admin: false },
-    desc: 'Acceso a Calculadora de Costos, Gestión diaria de movimientos y Guía operativa.',
+    label: 'Miembro Operador (Permiso Gestión)',
+    sections: { calc: true, gestion: true, curso: false, info: true },
   },
-  basico: {
-    id: 'basico',
-    label: 'Miembro Básico (Solo Calculadora)',
-    badgeColor: '#94A3B8',
-    sections: { calc: true, gestion: false, curso: false, info: true, admin: false },
-    desc: 'Acceso únicamente a la Calculadora de Costos de Bloques y Guía de Uso.',
+  pro: {
+    id: 'pro',
+    label: 'Miembro Bloquera Pro (Acceso Total)',
+    sections: { calc: true, gestion: true, curso: true, info: true },
+  },
+  admin: {
+    id: 'admin',
+    label: 'Administrador Maqte Colombia',
+    sections: { calc: true, gestion: true, curso: true, info: true },
   },
 };
 
@@ -50,42 +49,39 @@ const PORTAL_SECTIONS = [
     id: 'calc',
     label: 'Calculadora de Costos',
     shortDesc: 'Simulación de costos por bloque, mezclas y rentabilidad por lote',
+    requiredPermLabel: 'Acceso público y miembros',
     icon: Calculator,
   },
   {
     id: 'gestion',
     label: 'Gestión de Bloquera',
     shortDesc: 'Registro de ventas, compras, gastos, producción y respaldo CSV',
+    requiredPermLabel: 'Permiso Miembro Gestión / Pro',
     icon: ClipboardList,
   },
   {
     id: 'curso',
     label: 'Centro de Formación',
     shortDesc: '8 módulos técnicos del curso de fabricación de bloques Maqte',
+    requiredPermLabel: 'Permiso Miembro Formación / Pro',
     icon: GraduationCap,
   },
   {
     id: 'info',
     label: 'Guía de Uso',
-    shortDesc: 'Metodología de cálculo y recomendaciones operativas',
+    shortDesc: 'Guía oficial de bloques H10–H20 y metodología de cálculo',
+    requiredPermLabel: 'Acceso público y miembros',
     icon: HelpCircle,
   },
 ];
 
-const DEFAULT_USER_DIRECTORY = [
-  {
-    email: 'info@maqtecolombia.co',
-    name: 'Administrador Maqte Colombia',
-    role: 'admin',
-    sections: { calc: true, gestion: true, curso: true, info: true, admin: true },
-  },
-  {
-    email: 'ventas@maqtecolombia.co',
-    name: 'Equipo Comercial Maqte',
-    role: 'admin',
-    sections: { calc: true, gestion: true, curso: true, info: true, admin: true },
-  },
-];
+// Authorized emails pre-configured with full member permissions
+const AUTHORIZED_MEMBER_EMAILS = {
+  'info@maqtecolombia.co': 'admin',
+  'ventas@maqtecolombia.co': 'admin',
+  'pro@maqtecolombia.co': 'pro',
+  'operador@maqtecolombia.co': 'operador',
+};
 
 export default function Cuenta() {
   const { wixClient, isReady } = useWixClient();
@@ -93,10 +89,11 @@ export default function Cuenta() {
   // ── Auth & Member State ──
   const [authMode, setAuthMode] = useState('login'); // 'login' | 'register' | 'reset'
   const [authForm, setAuthForm] = useState({ name: '', email: '', password: '' });
-  const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const [isAuthLoading, setIsAuthLoading] = useState(false);
   const [authFeedback, setAuthFeedback] = useState({ type: '', message: '' });
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
-  // Active logged-in member (from Wix Members or authorized session)
+  // Active logged-in member (from Wix Members)
   const [currentUser, setCurrentUser] = useState(() => {
     try {
       const saved = localStorage.getItem(LOCAL_SESSION_KEY);
@@ -106,85 +103,108 @@ export default function Cuenta() {
     }
   });
 
-  // Directory of per-email permissions
-  const [userDirectory, setUserDirectory] = useState(() => {
-    try {
-      const raw = localStorage.getItem(PERMS_STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-    } catch {
-      // ignore
-    }
-    return DEFAULT_USER_DIRECTORY;
-  });
-
-  // Default role assigned to new Wix Members not explicitly in the directory
-  const [defaultMemberRole, setDefaultMemberRole] = useState(() => {
-    return localStorage.getItem('maqte_default_member_role') || 'pro';
-  });
-
   // Currently selected portal section tab
   const [activeSection, setActiveSection] = useState('calc');
+  // Toggle to preview the Sales Landing of each of the 3 benefits even when unlocked
+  const [viewSalesLanding, setViewSalesLanding] = useState(false);
 
-  // Form to add/assign permissions to a Wix Member by email
-  const [newPermUser, setNewPermUser] = useState({
-    email: '',
-    name: '',
-    role: 'pro',
-    sections: { calc: true, gestion: true, curso: true, info: true, admin: false },
-  });
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(PERMS_STORAGE_KEY, JSON.stringify(userDirectory));
-    } catch {
-      // ignore
-    }
-  }, [userDirectory]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('maqte_default_member_role', defaultMemberRole);
-    } catch {
-      // ignore
-    }
-  }, [defaultMemberRole]);
-
-  // Helper to resolve permissions for any member email + Wix badges
-  const resolveUserPermissions = useCallback(
-    (email, wixBadges = []) => {
+  // Resolve permissions for a Wix Member using Wix Badges + Wix CMS PermisosMiembros + pre-authorized emails
+  const resolveMemberPermissions = useCallback(
+    async (email, wixBadges = []) => {
       const normalizedEmail = (email || '').trim().toLowerCase();
-      const found = userDirectory.find(
-        u => u.email.trim().toLowerCase() === normalizedEmail
+
+      // 1. Check Wix CMS Collection 'PermisosMiembros' if available
+      if (normalizedEmail && wixClient?.items?.query) {
+        try {
+          const queryPromise = wixClient.items
+            .query(WIX_MEMBER_PERMS_COLLECTION)
+            .eq('email', normalizedEmail)
+            .limit(1)
+            .find();
+          const timeoutPromise = new Promise(resolve => setTimeout(() => resolve(null), 1200));
+          const cmsRes = await Promise.race([queryPromise, timeoutPromise]);
+          const cmsItem = cmsRes?.items?.[0];
+          if (cmsItem) {
+            return {
+              role: cmsItem.rol || 'pro',
+              roleLabel: cmsItem.nombreRol || 'Miembro Autorizado Wix',
+              sections: {
+                calc: cmsItem.calc !== false,
+                gestion: Boolean(cmsItem.gestion),
+                curso: Boolean(cmsItem.curso),
+                info: cmsItem.info !== false,
+              },
+            };
+          }
+        } catch {
+          // CMS collection optional
+        }
+      }
+
+      // 2. Check Wix Member Badges assigned in Wix Dashboard
+      const badgeSlugs = wixBadges.map(b =>
+        (typeof b === 'string' ? b : b?.slug || b?.title || '').toLowerCase()
       );
-      if (found) {
+      if (badgeSlugs.some(s => s.includes('admin'))) {
         return {
-          role: found.role,
-          sections: { ...found.sections },
+          role: 'admin',
+          roleLabel: ROLE_PRESETS.admin.label,
+          sections: { ...ROLE_PRESETS.admin.sections },
+        };
+      }
+      if (
+        badgeSlugs.some(
+          s => s.includes('pro') || s.includes('cliente') || s.includes('bloquera') || s.includes('vip')
+        )
+      ) {
+        return {
+          role: 'pro',
+          roleLabel: ROLE_PRESETS.pro.label,
+          sections: { ...ROLE_PRESETS.pro.sections },
+        };
+      }
+      if (badgeSlugs.some(s => s.includes('operador') || s.includes('gestion'))) {
+        return {
+          role: 'operador',
+          roleLabel: ROLE_PRESETS.operador.label,
+          sections: { ...ROLE_PRESETS.operador.sections },
+        };
+      }
+      if (badgeSlugs.some(s => s.includes('curso') || s.includes('formacion'))) {
+        return {
+          role: 'curso',
+          roleLabel: 'Miembro Formación Activa',
+          sections: { calc: true, gestion: false, curso: true, info: true },
         };
       }
 
-      // Check Wix Member Badges if present
-      const badgeSlugs = wixBadges.map(b => (b?.slug || b?.title || '').toLowerCase());
-      if (badgeSlugs.some(s => s.includes('admin'))) {
-        return { role: 'admin', sections: { ...ROLE_PRESETS.admin.sections } };
+      // 3. Check pre-authorized corporate / client emails
+      if (AUTHORIZED_MEMBER_EMAILS[normalizedEmail]) {
+        const presetKey = AUTHORIZED_MEMBER_EMAILS[normalizedEmail];
+        const preset = ROLE_PRESETS[presetKey] || ROLE_PRESETS.pro;
+        return {
+          role: preset.id,
+          roleLabel: preset.label,
+          sections: { ...preset.sections },
+        };
       }
-      if (badgeSlugs.some(s => s.includes('pro') || s.includes('cliente'))) {
-        return { role: 'pro', sections: { ...ROLE_PRESETS.pro.sections } };
-      }
-      if (badgeSlugs.some(s => s.includes('operador'))) {
-        return { role: 'operador', sections: { ...ROLE_PRESETS.operador.sections } };
+      if (normalizedEmail.endsWith('@maqtecolombia.co')) {
+        return {
+          role: 'pro',
+          roleLabel: ROLE_PRESETS.pro.label,
+          sections: { ...ROLE_PRESETS.pro.sections },
+        };
       }
 
-      const fallbackPreset = ROLE_PRESETS[defaultMemberRole] || ROLE_PRESETS.pro;
+      // 4. Default for registered member without special Wix Badge/Permission yet:
+      // Calculator & Guide unlocked; Gestión & Centro de Formación locked until permission is granted in Wix
       return {
-        role: fallbackPreset.id,
-        sections: { ...fallbackPreset.sections },
+        role: 'registrado_basico',
+        roleLabel: ROLE_PRESETS.registrado_basico.label,
+        sections: { ...ROLE_PRESETS.registrado_basico.sections },
       };
     },
-    [userDirectory, defaultMemberRole]
+    [wixClient]
   );
 
   // ── Check Wix Member Session on Mount ──
@@ -193,7 +213,6 @@ export default function Cuenta() {
     setIsAuthLoading(true);
 
     try {
-      // 1. Check if returning from Wix OAuth Redirect callback (fragment #code=... or query ?code=...)
       const urlParams = new URLSearchParams(window.location.search);
       const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
       const hasOAuthCode =
@@ -212,33 +231,12 @@ export default function Cuenta() {
             localStorage.removeItem('maqte_wix_oauth_data');
             window.history.replaceState({}, document.title, window.location.pathname);
           } catch (oauthErr) {
-            console.warn('[Wix Auth] OAuth callback handling warning:', oauthErr);
+            console.warn('[Wix Auth] OAuth callback warning:', oauthErr);
           }
         }
       }
 
-      // 1b. Check if returning from Wix Redirect Session (Google / Facebook / MemberLoginDialogV2)
-      if (urlParams.get('wixMemberLoggedIn') === 'true') {
-        const pendingProvider = localStorage.getItem('maqte_wix_social_provider') || 'Wix Social';
-        localStorage.removeItem('maqte_wix_social_provider');
-        window.history.replaceState({}, document.title, window.location.pathname);
-
-        if (!wixClient.auth.loggedIn()) {
-          const resolved = resolveUserPermissions('');
-          const socialSession = {
-            id: `wix-social-${Date.now()}`,
-            email: `miembro.${pendingProvider.toLowerCase()}@maqtecolombia.co`,
-            name: `Miembro (${pendingProvider})`,
-            source: `Wix Members · ${pendingProvider}`,
-            role: resolved.role,
-            sections: resolved.sections,
-          };
-          setCurrentUser(socialSession);
-          localStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(socialSession));
-        }
-      }
-
-      // 2. Check if logged in with Wix SDK
+      // Check if logged in with Wix SDK
       if (wixClient.auth.loggedIn()) {
         const response = await wixClient.members.getCurrentMember({
           fieldsets: ['FULL'],
@@ -262,17 +260,19 @@ export default function Cuenta() {
             // Badges optional
           }
 
-          const resolved = resolveUserPermissions(email, memberBadges);
+          const resolved = await resolveMemberPermissions(email, memberBadges);
           const sessionObj = {
             id: member._id,
             email,
             name,
             source: 'Wix Members',
             role: resolved.role,
+            roleLabel: resolved.roleLabel,
             sections: resolved.sections,
           };
           setCurrentUser(sessionObj);
           localStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(sessionObj));
+          setShowAuthModal(false);
         }
       }
     } catch (err) {
@@ -280,23 +280,19 @@ export default function Cuenta() {
     } finally {
       setIsAuthLoading(false);
     }
-  }, [wixClient, isReady, resolveUserPermissions]);
+  }, [wixClient, isReady, resolveMemberPermissions]);
 
   useEffect(() => {
     checkWixSession();
   }, [checkWixSession]);
 
-  // Keep currentUser's permissions synced if userDirectory changes
+  // Active permissions based on whether the user is logged in and what Wix Member permissions they have
   const activePermissions = useMemo(() => {
     if (!currentUser) {
-      return { calc: false, gestion: false, curso: false, info: false, admin: false };
+      return ROLE_PRESETS.visitante.sections;
     }
-    const found = userDirectory.find(
-      u => u.email.trim().toLowerCase() === (currentUser.email || '').trim().toLowerCase()
-    );
-    if (found) return found.sections;
-    return currentUser.sections || ROLE_PRESETS.pro.sections;
-  }, [currentUser, userDirectory]);
+    return currentUser.sections || ROLE_PRESETS.registrado_basico.sections;
+  }, [currentUser]);
 
   // ── Direct Wix Login / Register / Password Reset ──
   const handleDirectAuth = async (e) => {
@@ -341,7 +337,8 @@ export default function Cuenta() {
         );
         wixClient.auth.setTokens(tokens);
         await checkWixSession();
-        setAuthFeedback({ type: 'success', message: '¡Sesión iniciada correctamente con Wix Members!' });
+        setAuthFeedback({ type: 'success', message: '¡Sesión iniciada correctamente!' });
+        setShowAuthModal(false);
       } else if (response?.loginState === LoginState.EMAIL_VERIFICATION_REQUIRED) {
         setAuthFeedback({
           type: 'info',
@@ -350,39 +347,38 @@ export default function Cuenta() {
       } else if (response?.loginState === LoginState.OWNER_APPROVAL_REQUIRED) {
         setAuthFeedback({
           type: 'info',
-          message: 'Tu registro fue recibido y está pendiente de aprobación por el administrador de Maqte Colombia.',
+          message:
+            'Tu registro fue recibido y está pendiente de aprobación de permisos de miembro por MAQTECOLOMBIA.',
         });
       } else {
-        // If Wix requires Captcha or Hosted OAuth, offer direct member access or OAuth redirect
         const code = response?.errorCode || '';
         if (code === 'invalidPassword' || code === 'invalidEmail') {
           setAuthFeedback({
             type: 'error',
-            message: 'Correo o contraseña incorrectos. Verifica tus datos o usa el botón de Acceso Wix OAuth.',
+            message: 'Correo o contraseña incorrectos. Verifica tus datos.',
           });
         } else {
-          // Authenticate against the configured directory / Wix member email
-          const resolved = resolveUserPermissions(email);
-          const dirEntry = userDirectory.find(
-            u => u.email.trim().toLowerCase() === email.toLowerCase()
-          );
+          // Resolve member permissions from Wix CMS / badges / email
+          const resolved = await resolveMemberPermissions(email, []);
           const sessionObj = {
             id: `wix-member-${Date.now()}`,
             email,
-            name: dirEntry?.name || name || email.split('@')[0],
-            source: 'Miembro Autorizado Maqte',
+            name: name || email.split('@')[0],
+            source: 'Wix Members',
             role: resolved.role,
+            roleLabel: resolved.roleLabel,
             sections: resolved.sections,
           };
           setCurrentUser(sessionObj);
           localStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(sessionObj));
+          setShowAuthModal(false);
         }
       }
     } catch (err) {
       console.error('[Wix Auth] Error:', err);
       setAuthFeedback({
         type: 'error',
-        message: 'No se pudo conectar con el servidor de autenticación. Intenta de nuevo.',
+        message: 'No se pudo autenticar con Wix. Verifica tus credenciales o usa el acceso con Google/Facebook.',
       });
     } finally {
       setIsAuthLoading(false);
@@ -398,7 +394,6 @@ export default function Cuenta() {
     try {
       localStorage.setItem('maqte_wix_social_provider', provider);
 
-      // Build postFlowUrl using production domain if running on localhost so Wix Redirect Session accepts the callback domain
       const isLocal =
         window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
       const postFlowUrl = isLocal
@@ -418,7 +413,6 @@ export default function Cuenta() {
         }
       }
 
-      // Fallback to OAuth getAuthUrl
       const oauthData = wixClient.auth.generateOAuthData(postFlowUrl, window.location.href);
       localStorage.setItem('maqte_wix_oauth_data', JSON.stringify(oauthData));
       const { authUrl } = await wixClient.auth.getAuthUrl(oauthData);
@@ -427,31 +421,10 @@ export default function Cuenta() {
       console.error(`[Wix Social Auth - ${provider}] Error:`, err);
       setAuthFeedback({
         type: 'error',
-        message:
-          'No se pudo iniciar la redirección social con Wix. Verifica la conexión o ingresa con tu correo.',
+        message: 'No se pudo iniciar la redirección social con Wix. Intenta con tu correo.',
       });
       setIsAuthLoading(false);
     }
-  };
-
-  // ── Quick Role / Demo Login for Testing Permissions ──
-  const handleQuickRoleAccess = (presetKey) => {
-    const preset = ROLE_PRESETS[presetKey] || ROLE_PRESETS.admin;
-    const email =
-      presetKey === 'admin'
-        ? 'info@maqtecolombia.co'
-        : `${presetKey}@maqtecolombia.co`;
-    const sessionObj = {
-      id: `role-${presetKey}`,
-      email,
-      name: preset.label,
-      source: 'Wix Headless Role',
-      role: preset.id,
-      sections: { ...preset.sections },
-    };
-    setCurrentUser(sessionObj);
-    localStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(sessionObj));
-    setActiveSection('calc');
   };
 
   // ── Logout ──
@@ -467,381 +440,209 @@ export default function Cuenta() {
     }
   };
 
-  // ── Update Current User's Section Permission Live ──
-  const handleToggleCurrentUserSection = (secId) => {
-    if (!currentUser) return;
-    const updatedSections = {
-      ...activePermissions,
-      [secId]: !activePermissions[secId],
-    };
-    const updatedUser = {
-      ...currentUser,
-      sections: updatedSections,
-    };
-    setCurrentUser(updatedUser);
-    localStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(updatedUser));
-
-    // Also update in directory if present
-    setUserDirectory(prev => {
-      const idx = prev.findIndex(
-        u => u.email.trim().toLowerCase() === currentUser.email.trim().toLowerCase()
-      );
-      if (idx === -1) return prev;
-      const copy = [...prev];
-      copy[idx] = { ...copy[idx], sections: updatedSections };
-      return copy;
-    });
-  };
-
-  // ── Add or Update a Wix Member in the Permissions Directory ──
-  const handleSaveDirectoryUser = (e) => {
-    e.preventDefault();
-    const email = newPermUser.email.trim().toLowerCase();
-    if (!email) return;
-
-    const entry = {
-      email,
-      name: newPermUser.name.trim() || email.split('@')[0],
-      role: newPermUser.role,
-      sections: { ...newPermUser.sections },
-    };
-
-    setUserDirectory(prev => {
-      const existingIdx = prev.findIndex(u => u.email.trim().toLowerCase() === email);
-      if (existingIdx >= 0) {
-        const copy = [...prev];
-        copy[existingIdx] = entry;
-        return copy;
-      }
-      return [...prev, entry];
-    });
-
-    // If editing the currently logged-in user, update their session too
-    if (currentUser && currentUser.email.trim().toLowerCase() === email) {
-      const updated = { ...currentUser, role: entry.role, sections: entry.sections };
-      setCurrentUser(updated);
-      localStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(updated));
-    }
-
-    setNewPermUser({
-      email: '',
-      name: '',
-      role: 'pro',
-      sections: { calc: true, gestion: true, curso: true, info: true, admin: false },
-    });
-  };
-
-  const handleToggleDirectoryPermission = (email, secKey) => {
-    setUserDirectory(prev =>
-      prev.map(u => {
-        if (u.email.toLowerCase() !== email.toLowerCase()) return u;
-        return {
-          ...u,
-          sections: {
-            ...u.sections,
-            [secKey]: !u.sections[secKey],
-          },
-        };
-      })
-    );
-  };
-
-  const handleDeleteDirectoryUser = (email) => {
-    setUserDirectory(prev => prev.filter(u => u.email.toLowerCase() !== email.toLowerCase()));
-  };
-
-  // ─────────────────────────────────────────────────────────
-  // VIEW 1: NOT LOGGED IN -> WIX MEMBERS LOGIN / REGISTER
-  // ─────────────────────────────────────────────────────────
-  if (!currentUser) {
-    return (
-      <main className="cuenta-page">
-        <section className="cuenta-auth-section">
-          <div className="container cuenta-auth-grid">
-            {/* Left Column: Value Proposition & Section Modules Preview */}
-            <div className="cuenta-auth-info">
-              <span className="cuenta-badge">
-                <ShieldCheck size={14} /> Portal de Usuarios · Wix Members
-              </span>
-              <h1 className="cuenta-hero-title">
-                Plataforma <span className="cuenta-gold">Bloquera Digital</span>
-              </h1>
-              <p className="cuenta-hero-sub">
-                Inicia sesión con tu cuenta de miembro para acceder a las herramientas exclusivas de simulación de costos, gestión operativa de planta, formación técnica y configuración de permisos por sección.
-              </p>
-
-              <div className="cuenta-modules-preview">
-                {PORTAL_SECTIONS.map(sec => {
-                  const IconComp = sec.icon;
-                  return (
-                    <div key={sec.id} className="cuenta-preview-item">
-                      <div className="cuenta-preview-icon">
-                        <IconComp size={18} />
-                      </div>
-                      <div>
-                        <h4>{sec.label}</h4>
-                        <p>{sec.shortDesc}</p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Quick Access by Permission Profile */}
-              <div className="cuenta-quick-roles-box">
-                <span className="cuenta-quick-label">
-                  <Sparkles size={13} /> Acceso rápido por perfil de permisos:
-                </span>
-                <div className="cuenta-quick-btns">
-                  <button
-                    type="button"
-                    className="cuenta-role-chip role-admin"
-                    onClick={() => handleQuickRoleAccess('admin')}
-                  >
-                    <ShieldCheck size={14} /> Administrador (Todas + Permisos)
-                  </button>
-                  <button
-                    type="button"
-                    className="cuenta-role-chip"
-                    onClick={() => handleQuickRoleAccess('pro')}
-                  >
-                    Cliente Pro (4 Secciones)
-                  </button>
-                  <button
-                    type="button"
-                    className="cuenta-role-chip"
-                    onClick={() => handleQuickRoleAccess('operador')}
-                  >
-                    Operador (Calc + Gestión)
-                  </button>
-                  <button
-                    type="button"
-                    className="cuenta-role-chip"
-                    onClick={() => handleQuickRoleAccess('basico')}
-                  >
-                    Básico (Solo Calculadora)
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column: Wix Member Auth Card */}
-            <div className="cuenta-auth-card">
-              <div className="cuenta-auth-tabs">
-                <button
-                  type="button"
-                  className={authMode === 'login' ? 'active' : ''}
-                  onClick={() => {
-                    setAuthMode('login');
-                    setAuthFeedback({ type: '', message: '' });
-                  }}
-                >
-                  <LogIn size={15} /> Iniciar Sesión
-                </button>
-                <button
-                  type="button"
-                  className={authMode === 'register' ? 'active' : ''}
-                  onClick={() => {
-                    setAuthMode('register');
-                    setAuthFeedback({ type: '', message: '' });
-                  }}
-                >
-                  <UserPlus size={15} /> Registrarse
-                </button>
-              </div>
-
-              <div className="cuenta-auth-card-body">
-                <h2 className="cuenta-card-heading">
-                  {authMode === 'login'
-                    ? 'Acceso de Miembros'
-                    : authMode === 'register'
-                    ? 'Crear Cuenta de Miembro'
-                    : 'Recuperar Contraseña'}
-                </h2>
-                <p className="cuenta-card-sub">
-                  {authMode === 'login'
-                    ? 'Ingresa con tu correo registrado en Maqte Colombia para cargar tus secciones habilitadas.'
-                    : authMode === 'register'
-                    ? 'Regístrate como miembro en Wix Headless para acceder a Bloquera Digital.'
-                    : 'Te enviaremos un enlace de restablecimiento a tu correo.'}
-                </p>
-
-                {authFeedback.message && (
-                  <div className={`cuenta-alert alert-${authFeedback.type}`}>
-                    <AlertCircle size={16} />
-                    <span>{authFeedback.message}</span>
-                  </div>
-                )}
-
-                {authMode !== 'reset' && (
-                  <>
-                    <div className="cuenta-social-buttons">
-                      <button
-                        type="button"
-                        className="cuenta-social-btn social-google"
-                        onClick={() => handleWixSocialAuth('Google')}
-                        disabled={isAuthLoading}
-                      >
-                        <svg className="cuenta-social-svg" viewBox="0 0 24 24" aria-hidden="true">
-                          <path
-                            fill="#EA4335"
-                            d="M12 10.2v3.9h5.4c-.2 1.3-1.6 3.8-5.4 3.8-3.3 0-6-2.7-6-6s2.7-6 6-6c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.8 3.4 14.6 2.5 12 2.5 6.8 2.5 2.5 6.8 2.5 12s4.3 9.5 9.5 9.5c5.5 0 9.1-3.9 9.1-9.3 0-.6-.1-1.1-.2-1.6H12z"
-                          />
-                          <path
-                            fill="#34A853"
-                            d="M3.6 7.4l3.2 2.4C7.7 7.5 9.7 5.9 12 5.9c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.8 3.4 14.6 2.5 12 2.5 8.3 2.5 5.1 4.6 3.6 7.4z"
-                          />
-                          <path
-                            fill="#FBBC05"
-                            d="M12 21.5c2.5 0 4.7-.8 6.2-2.3l-2.9-2.4c-.8.6-1.9 1-3.3 1-2.5 0-4.6-1.7-5.4-4l-3.2 2.5c1.6 3.1 4.8 5.2 8.6 5.2z"
-                          />
-                          <path
-                            fill="#4285F4"
-                            d="M21.1 12.2c0-.6-.1-1.1-.2-1.6H12v3.9h5.4c-.3 1.3-1 2.3-2.1 3l2.9 2.4c1.7-1.6 2.9-4 2.9-7.7z"
-                          />
-                        </svg>
-                        <span>
-                          {authMode === 'register'
-                            ? 'Registrarse con Google'
-                            : 'Continuar con Google'}
-                        </span>
-                      </button>
-
-                      <button
-                        type="button"
-                        className="cuenta-social-btn social-facebook"
-                        onClick={() => handleWixSocialAuth('Facebook')}
-                        disabled={isAuthLoading}
-                      >
-                        <svg className="cuenta-social-svg" viewBox="0 0 24 24" aria-hidden="true">
-                          <path
-                            fill="#1877F2"
-                            d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047v-2.66c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.971H15.83c-1.491 0-1.956.93-1.956 1.886v2.264h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"
-                          />
-                        </svg>
-                        <span>
-                          {authMode === 'register'
-                            ? 'Registrarse con Facebook'
-                            : 'Continuar con Facebook'}
-                        </span>
-                      </button>
-                    </div>
-
-                    <div className="cuenta-divider">
-                      <span>o con tu correo electrónico</span>
-                    </div>
-                  </>
-                )}
-
-                <form className="cuenta-auth-form" onSubmit={handleDirectAuth}>
-                  {authMode === 'register' && (
-                    <div className="cuenta-field">
-                      <label htmlFor="auth-name">Nombre o Empresa</label>
-                      <input
-                        id="auth-name"
-                        type="text"
-                        placeholder="Ej. Constructora del Caquetá"
-                        value={authForm.name}
-                        onChange={e => setAuthForm(prev => ({ ...prev, name: e.target.value }))}
-                        required
-                      />
-                    </div>
-                  )}
-
-                  <div className="cuenta-field">
-                    <label htmlFor="auth-email">Correo electrónico</label>
-                    <input
-                      id="auth-email"
-                      type="email"
-                      placeholder="tu@correo.com"
-                      value={authForm.email}
-                      onChange={e => setAuthForm(prev => ({ ...prev, email: e.target.value }))}
-                      required
-                    />
-                  </div>
-
-                  {authMode !== 'reset' && (
-                    <div className="cuenta-field">
-                      <label htmlFor="auth-pass">Contraseña</label>
-                      <input
-                        id="auth-pass"
-                        type="password"
-                        placeholder="••••••••"
-                        value={authForm.password}
-                        onChange={e => setAuthForm(prev => ({ ...prev, password: e.target.value }))}
-                        required
-                      />
-                    </div>
-                  )}
-
-                  <button
-                    type="submit"
-                    className="btn btn-primary cuenta-submit-btn"
-                    disabled={isAuthLoading}
-                  >
-                    {isAuthLoading
-                      ? 'Verificando con Wix...'
-                      : authMode === 'login'
-                      ? 'Ingresar al Portal'
-                      : authMode === 'register'
-                      ? 'Registrar Miembro'
-                      : 'Enviar Correo de Recuperación'}
-                  </button>
-                </form>
-
-                <div className="cuenta-divider">
-                  <span>o portal unificado Wix</span>
-                </div>
-
-                <button
-                  type="button"
-                  className="btn btn-outline cuenta-oauth-btn"
-                  onClick={() => handleWixSocialAuth('Wix')}
-                  disabled={isAuthLoading}
-                >
-                  <ExternalLink size={15} /> Abrir ventana oficial de Wix Members
-                </button>
-
-                <div className="cuenta-auth-footer-links">
-                  {authMode !== 'reset' ? (
-                    <button
-                      type="button"
-                      className="cuenta-link-btn"
-                      onClick={() => setAuthMode('reset')}
-                    >
-                      ¿Olvidaste tu contraseña?
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      className="cuenta-link-btn"
-                      onClick={() => setAuthMode('login')}
-                    >
-                      Volver a iniciar sesión
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
-    );
-  }
-
-  // ─────────────────────────────────────────────────────────
-  // VIEW 2: LOGGED IN -> PORTAL DE USUARIOS CON SECCIONES Y PERMISOS
-  // ─────────────────────────────────────────────────────────
-  const isCurrentSectionAllowed =
-    activeSection === 'permisos'
-      ? true
-      : activePermissions[activeSection] !== false;
-
+  const isCurrentSectionAllowed = activePermissions[activeSection] !== false;
   const activeSectionMeta = PORTAL_SECTIONS.find(s => s.id === activeSection);
+
+  // Reusable Auth Card (rendered inside locked section or inside topbar login modal)
+  const renderWixAuthCard = () => (
+    <div className="cuenta-auth-card">
+      <div className="cuenta-auth-tabs">
+        <button
+          type="button"
+          className={authMode === 'login' ? 'active' : ''}
+          onClick={() => {
+            setAuthMode('login');
+            setAuthFeedback({ type: '', message: '' });
+          }}
+        >
+          <LogIn size={15} /> Iniciar Sesión
+        </button>
+        <button
+          type="button"
+          className={authMode === 'register' ? 'active' : ''}
+          onClick={() => {
+            setAuthMode('register');
+            setAuthFeedback({ type: '', message: '' });
+          }}
+        >
+          <UserPlus size={15} /> Registrarse
+        </button>
+      </div>
+
+      <div className="cuenta-auth-card-body">
+        <h2 className="cuenta-card-heading">
+          {authMode === 'login'
+            ? 'Acceso de Miembros'
+            : authMode === 'register'
+            ? 'Crear Cuenta de Miembro'
+            : 'Recuperar Contraseña'}
+        </h2>
+        <p className="cuenta-card-sub">
+          {authMode === 'login'
+            ? 'Inicia sesión con tu cuenta registrada en Maqte Colombia para desbloquear las secciones según tus permisos de miembro.'
+            : authMode === 'register'
+            ? 'Regístrate como miembro en Wix para vincular tus permisos de acceso a Bloquera Digital.'
+            : 'Te enviaremos un enlace de restablecimiento a tu correo.'}
+        </p>
+
+        {authFeedback.message && (
+          <div className={`cuenta-alert alert-${authFeedback.type}`}>
+            <AlertCircle size={16} />
+            <span>{authFeedback.message}</span>
+          </div>
+        )}
+
+        {authMode !== 'reset' && (
+          <>
+            <div className="cuenta-social-buttons">
+              <button
+                type="button"
+                className="cuenta-social-btn social-google"
+                onClick={() => handleWixSocialAuth('Google')}
+                disabled={isAuthLoading}
+              >
+                <svg className="cuenta-social-svg" viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    fill="#EA4335"
+                    d="M12 10.2v3.9h5.4c-.2 1.3-1.6 3.8-5.4 3.8-3.3 0-6-2.7-6-6s2.7-6 6-6c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.8 3.4 14.6 2.5 12 2.5 6.8 2.5 2.5 6.8 2.5 12s4.3 9.5 9.5 9.5c5.5 0 9.1-3.9 9.1-9.3 0-.6-.1-1.1-.2-1.6H12z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M3.6 7.4l3.2 2.4C7.7 7.5 9.7 5.9 12 5.9c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.8 3.4 14.6 2.5 12 2.5 8.3 2.5 5.1 4.6 3.6 7.4z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M12 21.5c2.5 0 4.7-.8 6.2-2.3l-2.9-2.4c-.8.6-1.9 1-3.3 1-2.5 0-4.6-1.7-5.4-4l-3.2 2.5c1.6 3.1 4.8 5.2 8.6 5.2z"
+                  />
+                  <path
+                    fill="#4285F4"
+                    d="M21.1 12.2c0-.6-.1-1.1-.2-1.6H12v3.9h5.4c-.3 1.3-1 2.3-2.1 3l2.9 2.4c1.7-1.6 2.9-4 2.9-7.7z"
+                  />
+                </svg>
+                <span>
+                  {authMode === 'register' ? 'Registrarse con Google' : 'Continuar con Google'}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                className="cuenta-social-btn social-facebook"
+                onClick={() => handleWixSocialAuth('Facebook')}
+                disabled={isAuthLoading}
+              >
+                <svg className="cuenta-social-svg" viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    fill="#1877F2"
+                    d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047v-2.66c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.971H15.83c-1.491 0-1.956.93-1.956 1.886v2.264h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"
+                  />
+                </svg>
+                <span>
+                  {authMode === 'register' ? 'Registrarse con Facebook' : 'Continuar con Facebook'}
+                </span>
+              </button>
+            </div>
+
+            <div className="cuenta-divider">
+              <span>o con tu correo electrónico</span>
+            </div>
+          </>
+        )}
+
+        <form className="cuenta-auth-form" onSubmit={handleDirectAuth}>
+          {authMode === 'register' && (
+            <div className="cuenta-field">
+              <label htmlFor="auth-name">Nombre o Empresa</label>
+              <input
+                id="auth-name"
+                type="text"
+                placeholder="Ej. Constructora del Caquetá"
+                value={authForm.name}
+                onChange={e => setAuthForm(prev => ({ ...prev, name: e.target.value }))}
+                required
+              />
+            </div>
+          )}
+
+          <div className="cuenta-field">
+            <label htmlFor="auth-email">Correo electrónico</label>
+            <input
+              id="auth-email"
+              type="email"
+              placeholder="tu@correo.com"
+              value={authForm.email}
+              onChange={e => setAuthForm(prev => ({ ...prev, email: e.target.value }))}
+              required
+            />
+          </div>
+
+          {authMode !== 'reset' && (
+            <div className="cuenta-field">
+              <label htmlFor="auth-pass">Contraseña</label>
+              <input
+                id="auth-pass"
+                type="password"
+                placeholder="••••••••"
+                value={authForm.password}
+                onChange={e => setAuthForm(prev => ({ ...prev, password: e.target.value }))}
+                required
+              />
+            </div>
+          )}
+
+          <button
+            type="submit"
+            className="btn btn-primary cuenta-submit-btn"
+            disabled={isAuthLoading}
+          >
+            {isAuthLoading
+              ? 'Verificando permisos en Wix...'
+              : authMode === 'login'
+              ? 'Ingresar con mi Cuenta'
+              : authMode === 'register'
+              ? 'Registrarme como Miembro'
+              : 'Enviar Correo de Recuperación'}
+          </button>
+        </form>
+
+        <div className="cuenta-divider">
+          <span>o ventana oficial de Wix</span>
+        </div>
+
+        <button
+          type="button"
+          className="btn btn-outline cuenta-oauth-btn"
+          onClick={() => handleWixSocialAuth('Wix')}
+          disabled={isAuthLoading}
+        >
+          <ExternalLink size={15} /> Acceder con Portal Wix Members
+        </button>
+
+        <div className="cuenta-auth-footer-links">
+          {authMode !== 'reset' ? (
+            <button
+              type="button"
+              className="cuenta-link-btn"
+              onClick={() => setAuthMode('reset')}
+            >
+              ¿Olvidaste tu contraseña?
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="cuenta-link-btn"
+              onClick={() => setAuthMode('login')}
+            >
+              Volver a iniciar sesión
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <main className="cuenta-page">
-      {/* ─── TOP USER & PERMISSIONS BAR ─── */}
+      {/* ─── TOP USER & MEMBER PERMISSIONS STATUS BAR ─── */}
       <div className="cuenta-topbar">
         <div className="container cuenta-topbar-inner">
           <div className="cuenta-user-meta">
@@ -849,60 +650,112 @@ export default function Cuenta() {
               <User size={20} />
             </div>
             <div>
-              <div className="cuenta-user-name-row">
-                <strong>{currentUser.name}</strong>
-                <span className="cuenta-role-pill">
-                  <ShieldCheck size={12} />
-                  {ROLE_PRESETS[currentUser.role]?.label || 'Miembro Autorizado'}
-                </span>
-              </div>
-              <span className="cuenta-user-email">
-                {currentUser.email} · {currentUser.source}
-              </span>
+              {currentUser ? (
+                <>
+                  <div className="cuenta-user-name-row">
+                    <strong>{currentUser.name}</strong>
+                    <span className="cuenta-role-pill">
+                      <ShieldCheck size={12} />
+                      {currentUser.roleLabel ||
+                        ROLE_PRESETS[currentUser.role]?.label ||
+                        'Miembro Registrado'}
+                    </span>
+                  </div>
+                  <span className="cuenta-user-email">
+                    {currentUser.email} · {currentUser.source}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <div className="cuenta-user-name-row">
+                    <strong>Bloquera Digital · MAQTECOLOMBIA</strong>
+                    <span className="cuenta-role-pill">
+                      <Lock size={12} /> Modo Visitante
+                    </span>
+                  </div>
+                  <span className="cuenta-user-email">
+                    Inicia sesión con tu cuenta de miembro para desbloquear Gestión y Centro de Formación
+                  </span>
+                </>
+              )}
             </div>
           </div>
 
-          {/* Active Permissions Pills */}
+          {/* Read-only Member Permission Badges */}
           <div className="cuenta-perms-summary">
-            <span className="cuenta-perms-lbl">Permisos activos:</span>
+            <span className="cuenta-perms-lbl">Estado de acceso:</span>
             {PORTAL_SECTIONS.map(sec => {
               const allowed = activePermissions[sec.id] !== false;
               return (
-                <button
+                <span
                   key={sec.id}
-                  type="button"
                   className={`cuenta-perm-chip ${allowed ? 'allowed' : 'denied'}`}
-                  onClick={() => handleToggleCurrentUserSection(sec.id)}
-                  title="Haz clic para activar/desactivar este permiso en tu sesión"
+                  title={
+                    allowed
+                      ? `${sec.label}: Acceso habilitado`
+                      : `${sec.label}: Bloqueado (requiere permiso de miembro)`
+                  }
                 >
                   {allowed ? <Unlock size={11} /> : <Lock size={11} />}
                   <span>{sec.label.split(' ')[0]}</span>
-                </button>
+                </span>
               );
             })}
           </div>
 
           <div className="cuenta-topbar-actions">
-            <button
-              type="button"
-              className={`cuenta-manage-perms-btn ${activeSection === 'permisos' ? 'active' : ''}`}
-              onClick={() => setActiveSection('permisos')}
-            >
-              <Settings size={15} /> Permisos de Usuario
-            </button>
-            <button
-              type="button"
-              className="cuenta-logout-btn"
-              onClick={handleLogout}
-              title="Cerrar sesión"
-            >
-              <LogOut size={15} /> Salir
-            </button>
+            {activeSection !== 'info' && isCurrentSectionAllowed && (
+              <button
+                type="button"
+                className={`cuenta-manage-perms-btn ${viewSalesLanding ? 'active' : ''}`}
+                onClick={() => setViewSalesLanding(prev => !prev)}
+                title="Alternar entre la Landing Comercial de este Beneficio y la Herramienta"
+              >
+                {viewSalesLanding ? (
+                  <>
+                    <PlayCircle size={14} /> Abrir Herramienta
+                  </>
+                ) : (
+                  <>
+                    <Eye size={14} /> Ver Landing de Venta
+                  </>
+                )}
+              </button>
+            )}
+
+            {currentUser ? (
+              <>
+                <button
+                  type="button"
+                  className="cuenta-manage-perms-btn"
+                  onClick={checkWixSession}
+                  title="Sincronizar permisos de miembro desde Wix"
+                >
+                  <RefreshCw size={14} /> Actualizar Permisos
+                </button>
+                <button
+                  type="button"
+                  className="cuenta-logout-btn"
+                  onClick={handleLogout}
+                  title="Cerrar sesión"
+                >
+                  <LogOut size={15} /> Salir
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                className="cuenta-manage-perms-btn active"
+                onClick={() => setShowAuthModal(true)}
+              >
+                <LogIn size={15} /> Iniciar Sesión / Registrarse
+              </button>
+            )}
           </div>
         </div>
       </div>
 
-      {/* ─── SEPARATE SECTION TABS NAVIGATION ─── */}
+      {/* ─── 4 SECTION TABS NAVIGATION ─── */}
       <div className="cuenta-sections-nav-wrap">
         <div className="container">
           <div className="cuenta-sections-tabs" role="tablist">
@@ -928,28 +781,12 @@ export default function Cuenta() {
                       {!allowed && <Lock size={13} className="cuenta-lock-ico" />}
                     </span>
                     <small className="cuenta-sec-tab-sub">
-                      {allowed ? 'Acceso habilitado' : 'Sin permiso'}
+                      {allowed ? 'Acceso habilitado' : 'Landing de Venta · Solo miembros'}
                     </small>
                   </div>
                 </button>
               );
             })}
-
-            <button
-              type="button"
-              role="tab"
-              aria-selected={activeSection === 'permisos'}
-              className={`cuenta-sec-tab tab-admin ${activeSection === 'permisos' ? 'active' : ''}`}
-              onClick={() => setActiveSection('permisos')}
-            >
-              <div className="cuenta-sec-tab-icon">
-                <KeyRound size={18} />
-              </div>
-              <div className="cuenta-sec-tab-text">
-                <span className="cuenta-sec-tab-title">Permisos de Usuario</span>
-                <small className="cuenta-sec-tab-sub">Control de accesos por sección</small>
-              </div>
-            </button>
           </div>
         </div>
       </div>
@@ -957,270 +794,24 @@ export default function Cuenta() {
       {/* ─── SECTION CONTENT AREA ─── */}
       <div className="cuenta-content-area">
         <div className="container">
-          {/* Case A: Permisos de Usuario Administration Panel */}
-          {activeSection === 'permisos' ? (
-            <div className="cuenta-perms-panel">
-              <div className="cuenta-perms-header-card">
-                <div>
-                  <span className="bdig-step-tag">Administración de Accesos · Wix Members</span>
-                  <h2 className="bdig-card-title" style={{ fontSize: '1.6rem' }}>
-                    Control de Permisos de Usuario por Sección
-                  </h2>
-                  <p className="bdig-form-note" style={{ marginBottom: 0 }}>
-                    Habilita o restringe de forma independiente qué secciones de <strong>Bloquera Digital</strong> puede ver y utilizar cada usuario o miembro autenticado.
-                  </p>
-                </div>
-
-                <div className="cuenta-default-role-box">
-                  <label htmlFor="default-role-sel">Rol por defecto para nuevos miembros Wix:</label>
-                  <select
-                    id="default-role-sel"
-                    value={defaultMemberRole}
-                    onChange={e => setDefaultMemberRole(e.target.value)}
-                  >
-                    {Object.values(ROLE_PRESETS).map(r => (
-                      <option key={r.id} value={r.id}>
-                        {r.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Current Session Quick Permission Toggles */}
-              <div className="cuenta-my-perms-card">
-                <h3 className="cuenta-subcard-title">
-                  1. Permisos de tu sesión actual ({currentUser.email})
-                </h3>
-                <p className="cuenta-subcard-desc">
-                  Activa o desactiva cualquier sección para probar en tiempo real el bloqueo y desbloqueo de pestañas:
-                </p>
-                <div className="cuenta-my-perms-grid">
-                  {PORTAL_SECTIONS.map(sec => {
-                    const IconComp = sec.icon;
-                    const enabled = activePermissions[sec.id] !== false;
-                    return (
-                      <div
-                        key={sec.id}
-                        className={`cuenta-perm-toggle-card ${enabled ? 'enabled' : 'disabled'}`}
-                        onClick={() => handleToggleCurrentUserSection(sec.id)}
-                      >
-                        <div className="cuenta-ptc-top">
-                          <div className="cuenta-ptc-icon">
-                            <IconComp size={18} />
-                          </div>
-                          <span className={`cuenta-ptc-status ${enabled ? 'on' : 'off'}`}>
-                            {enabled ? (
-                              <>
-                                <CheckCircle2 size={13} /> Habilitado
-                              </>
-                            ) : (
-                              <>
-                                <Lock size={13} /> Restringido
-                              </>
-                            )}
-                          </span>
-                        </div>
-                        <h4>{sec.label}</h4>
-                        <p>{sec.shortDesc}</p>
-                        <div className="cuenta-ptc-action">
-                          <button type="button" className="cuenta-ptc-btn">
-                            {enabled ? 'Bloquear sección' : 'Habilitar sección'}
-                          </button>
-                          <button
-                            type="button"
-                            className="cuenta-ptc-open-btn"
-                            onClick={e => {
-                              e.stopPropagation();
-                              setActiveSection(sec.id);
-                            }}
-                          >
-                            Ir a sección →
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Add / Edit Member Permissions by Email + Table */}
-              <div className="cuenta-directory-grid">
-                <form className="cuenta-add-user-card" onSubmit={handleSaveDirectoryUser}>
-                  <span className="bdig-step-tag">Asignar Permisos por Miembro</span>
-                  <h3 className="cuenta-subcard-title">Agregar / Editar Usuario Wix</h3>
-                  <p className="cuenta-subcard-desc">
-                    Asigna qué secciones específicas tendrá habilitadas un miembro cuando inicie sesión con su correo.
-                  </p>
-
-                  <div className="cuenta-field">
-                    <label>Correo electrónico del miembro (Wix)</label>
-                    <input
-                      type="email"
-                      placeholder="cliente@constructora.com"
-                      value={newPermUser.email}
-                      onChange={e => setNewPermUser(prev => ({ ...prev, email: e.target.value }))}
-                      required
-                    />
-                  </div>
-
-                  <div className="cuenta-field">
-                    <label>Nombre o Empresa</label>
-                    <input
-                      type="text"
-                      placeholder="Ej. Carlos Gómez - Bloquera Sur"
-                      value={newPermUser.name}
-                      onChange={e => setNewPermUser(prev => ({ ...prev, name: e.target.value }))}
-                    />
-                  </div>
-
-                  <div className="cuenta-field">
-                    <label>Plantilla de Rol</label>
-                    <select
-                      value={newPermUser.role}
-                      onChange={e => {
-                        const roleId = e.target.value;
-                        const preset = ROLE_PRESETS[roleId] || ROLE_PRESETS.pro;
-                        setNewPermUser(prev => ({
-                          ...prev,
-                          role: roleId,
-                          sections: { ...preset.sections },
-                        }));
-                      }}
-                    >
-                      {Object.values(ROLE_PRESETS).map(r => (
-                        <option key={r.id} value={r.id}>
-                          {r.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="cuenta-field">
-                    <label>Secciones habilitadas individualmente:</label>
-                    <div className="cuenta-checkbox-list">
-                      {PORTAL_SECTIONS.map(sec => (
-                        <label key={sec.id} className="cuenta-checkbox-item">
-                          <input
-                            type="checkbox"
-                            checked={!!newPermUser.sections[sec.id]}
-                            onChange={e =>
-                              setNewPermUser(prev => ({
-                                ...prev,
-                                sections: {
-                                  ...prev.sections,
-                                  [sec.id]: e.target.checked,
-                                },
-                              }))
-                            }
-                          />
-                          <span>{sec.label}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  <button type="submit" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
-                    <Plus size={16} /> Guardar Permisos de Usuario
-                  </button>
-                </form>
-
-                {/* Directory Table */}
-                <div className="cuenta-directory-table-card">
-                  <span className="bdig-step-tag">Directorio de Accesos</span>
-                  <h3 className="cuenta-subcard-title">
-                    Usuarios y Permisos por Sección ({userDirectory.length})
-                  </h3>
-                  <p className="cuenta-subcard-desc">
-                    Haz clic en los interruptores de la tabla para encender o apagar el permiso de cada sección por separado.
-                  </p>
-
-                  <div className="bdig-table-wrap">
-                    <table className="bdig-records-table cuenta-perms-table">
-                      <thead>
-                        <tr>
-                          <th>Usuario / Correo</th>
-                          <th style={{ textAlign: 'center' }}>Calculadora</th>
-                          <th style={{ textAlign: 'center' }}>Gestión CSV</th>
-                          <th style={{ textAlign: 'center' }}>Formación</th>
-                          <th style={{ textAlign: 'center' }}>Guía</th>
-                          <th></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {userDirectory.map(u => (
-                          <tr key={u.email}>
-                            <td>
-                              <strong>{u.name}</strong>
-                              <span style={{ display: 'block', fontSize: '0.76rem', color: '#64748B' }}>
-                                {u.email}
-                              </span>
-                            </td>
-                            {['calc', 'gestion', 'curso', 'info'].map(secKey => {
-                              const on = !!u.sections?.[secKey];
-                              return (
-                                <td key={secKey} style={{ textAlign: 'center' }}>
-                                  <button
-                                    type="button"
-                                    className={`cuenta-cell-toggle ${on ? 'on' : 'off'}`}
-                                    onClick={() => handleToggleDirectoryPermission(u.email, secKey)}
-                                  >
-                                    {on ? 'Sí' : 'No'}
-                                  </button>
-                                </td>
-                              );
-                            })}
-                            <td style={{ textAlign: 'right' }}>
-                              <button
-                                type="button"
-                                className="bdig-row-del"
-                                onClick={() => handleDeleteDirectoryUser(u.email)}
-                                title="Eliminar usuario"
-                              >
-                                <Trash2 size={14} />
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : !isCurrentSectionAllowed ? (
-            /* Case B: Locked Section Screen when user lacks permission */
-            <div className="cuenta-locked-card">
-              <div className="cuenta-locked-icon">
-                <ShieldAlert size={36} />
-              </div>
-              <span className="bdig-step-tag">Sección Restringida por Permisos de Usuario</span>
-              <h2>Acceso no habilitado a: {activeSectionMeta?.label}</h2>
-              <p>
-                Tu perfil actual (<strong>{currentUser.email}</strong>) no tiene habilitado el permiso para la sección <strong>{activeSectionMeta?.label}</strong>. Solicita la activación a MAQTECOLOMBIA o habilítalo desde la pestaña de Permisos de Usuario.
-              </p>
-              <div className="cuenta-locked-actions">
-                <a
-                  href={`https://wa.me/${BRAND.whatsapp}?text=${encodeURIComponent(
-                    `SW- Hola Maqte Colombia, solicito habilitar el permiso de acceso a la sección "${activeSectionMeta?.label}" en Bloquera Digital para mi usuario: ${currentUser.email}`
-                  )}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="btn btn-primary"
-                >
-                  <MessageCircle size={17} /> Solicitar Permiso por WhatsApp
-                </a>
-                <button
-                  type="button"
-                  className="btn btn-outline cuenta-unlock-btn"
-                  onClick={() => setActiveSection('permisos')}
-                >
-                  <Settings size={16} /> Configurar en Permisos de Usuario
-                </button>
-              </div>
-            </div>
+          {activeSection !== 'info' && (!isCurrentSectionAllowed || viewSalesLanding) ? (
+            /* Case A: Render Sales Landing for Benefit 01 (calc), 02 (gestion), or 03 (curso) */
+            <BenefitSalesLanding
+              benefitId={activeSection}
+              isLocked={!isCurrentSectionAllowed}
+              currentUser={currentUser}
+              onOpenTool={
+                isCurrentSectionAllowed ? () => setViewSalesLanding(false) : undefined
+              }
+              onSelectBenefit={id => {
+                setActiveSection(id);
+                setViewSalesLanding(true);
+              }}
+              onRequestLogin={checkWixSession}
+              authCardElement={!currentUser ? renderWixAuthCard() : null}
+            />
           ) : (
-            /* Case C: Active Allowed Section rendered independently */
+            /* Case B: Active Section is Allowed -> Render Interactive Tool */
             <BloqueraDigitalSection
               activeSection={activeSection}
               onSectionChange={setActiveSection}
@@ -1230,7 +821,21 @@ export default function Cuenta() {
           )}
         </div>
       </div>
+
+      {/* ─── LOGIN / REGISTER MODAL (WHEN OPENED FROM TOPBAR) ─── */}
+      {showAuthModal && !currentUser && (
+        <div
+          className="bdig-guide-modal-backdrop"
+          onClick={() => setShowAuthModal(false)}
+        >
+          <div
+            style={{ width: '100%', maxWidth: '480px', position: 'relative' }}
+            onClick={e => e.stopPropagation()}
+          >
+            {renderWixAuthCard()}
+          </div>
+        </div>
+      )}
     </main>
   );
 }
-
